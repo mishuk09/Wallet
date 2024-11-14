@@ -5,9 +5,12 @@ import { collection, setDoc, doc } from "firebase/firestore"; // Correct Firesto
 
 const ConnectWallet = ({ onWalletConnected }) => {
     const [walletAddress, setWalletAddress] = useState("");
+    const [error, setError] = useState('');
+    const [walletNotDetected, setWalletNotDetected] = useState(false); // Add state for checking MetaMask
 
     const connectWallet = async () => {
         if (window.ethereum) {
+            setWalletNotDetected(false); // Reset the wallet not detected state when MetaMask is found
             try {
                 // Initialize provider using the Ethereum provider
                 const provider = new ethers.providers.Web3Provider(window.ethereum); // Use Web3Provider here
@@ -35,7 +38,7 @@ const ConnectWallet = ({ onWalletConnected }) => {
                 alert('Error connecting to wallet');
             }
         } else {
-            alert("Please install a crypto wallet like MetaMask.");
+            setWalletNotDetected(true); // Set state to show the message when MetaMask is not detected
         }
     };
 
@@ -53,9 +56,12 @@ const ConnectWallet = ({ onWalletConnected }) => {
                 />
             </button>
             {walletAddress && <p className="mt-4 text-xl text-gray-700"><span className="font-bold">Wallet Connected:</span> {walletAddress}</p>}
+            {walletNotDetected && (
+                <p className="mt-4 text-xl text-red-600">
+                    Add MetaMask Wallet in your Browser to connect.
+                </p>
+            )}
         </div>
-
-
     );
 };
 
