@@ -15,7 +15,7 @@ const Home = () => {
             <div className='flex flex-col items-center justify-center mt-24'>
                 {/* Home Title */}
                 <h1 className='text-5xl font-bold text-gray-800'>
-                👋 Welcome to Crypto
+                    👋 Welcome to Crypto
                     <span className='text-blue-600 inline-block'>
                         Wallet
                         {/* Image Below Wallet Text */}
@@ -31,9 +31,21 @@ const Home = () => {
                 </p>
 
                 {/* Start Registration Button */}
-                <button className='bg-blue-500 hover:bg-blue-600 duration-75 text-white mt-6 px-10 py-3 rounded-md text-lg mb-10'>
+                <button className='bg-blue-500 hover:bg-blue-600 duration-75 text-white mt-6 px-10 py-3 rounded-md text-lg '>
                     Start
                 </button>
+
+                {/* Verified Businesses Map Section */}
+                <div className='w-full mt-12 mb-10'>
+                    <h2 className='text-xl font-semibold text-gray-800 text-center mb-4'>
+                        Verified Businesses Near You
+                    </h2>
+                    {/* Map Container */}
+                    <div className='w-full h-[400px] bg-white rounded-lg shadow-lg'>
+                        {/* Replace this with an actual map, e.g., Google Maps */}
+                        <p className='text-center text-gray-600 py-16'>Map will be displayed here.</p>
+                    </div>
+                </div>
             </div>
         </div>
     );
