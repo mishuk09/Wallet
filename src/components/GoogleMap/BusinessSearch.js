@@ -18,6 +18,7 @@ const BusinessSearch = ({ walletAddress, onBusinessClaimed }) => {  // Corrected
             const place = places[0];
             const location = place.geometry.location;
 
+            // Ensure that we always get the correct details for name and phone
             const businessDetails = {
                 name: place.name || "No name available",
                 lat: location.lat(),
@@ -63,6 +64,28 @@ const BusinessSearch = ({ walletAddress, onBusinessClaimed }) => {  // Corrected
             googleMapsApiKey="AIzaSyDOEDZEEqWAyWNyKpBNrhF9Cxti0AfRVDU"
             libraries={["places"]}
         >
+            {/* Search Box - Positioned outside of GoogleMap */}
+            <div className="search-box-container" style={{ position: "absolute", top: "10px", left: "50%", transform: "translateX(-50%)", zIndex: 1, width: "80%" }}>
+                <StandaloneSearchBox
+                    onLoad={(ref) => (searchBoxRef.current = ref)}
+                    onPlacesChanged={handleSearchBoxPlaces}
+                >
+                    <input
+                        type="text"
+                        placeholder="Search for businesses"
+                        style={{
+                            padding: "10px",
+                            fontSize: "15px",
+                            width: "100%",
+                            boxSizing: "border-box",
+                            borderRadius: "5px",
+                            backgroundColor: "#fff",
+                            boxShadow: "0 2px 6px rgba(0, 0, 0, 0.3)",
+                        }}
+                    />
+                </StandaloneSearchBox>
+            </div>
+
             <GoogleMap
                 mapContainerStyle={mapContainerStyle}
                 zoom={12}
@@ -80,23 +103,6 @@ const BusinessSearch = ({ walletAddress, onBusinessClaimed }) => {  // Corrected
                     }));
                 }}
             >
-                <StandaloneSearchBox
-                    onLoad={(ref) => (searchBoxRef.current = ref)}
-                    onPlacesChanged={handleSearchBoxPlaces}
-                >
-                    <input
-                        type="text"
-                        placeholder="Search for businesses"
-                        style={{
-                            padding: "10px",
-                            fontSize: "15px",
-                            width: "100%",
-                            boxSizing: "border-box",
-                            borderRadius: "5px",
-                        }}
-                    />
-                </StandaloneSearchBox>
-
                 {selectedBusiness && (
                     <Marker position={{ lat: selectedBusiness.lat, lng: selectedBusiness.lng }} />
                 )}
