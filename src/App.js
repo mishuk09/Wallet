@@ -5,6 +5,8 @@ import { useState } from 'react';
 import ConnectWallet from './components/Wallet/ConnectWallet';
 import HomeScreen from './components/Wallet/HomeScreen';
 import VerifyBusiness from './components/Wallet/VerifyBusiness';
+import FormifyProject from './components/onBoard/FormifyProject';
+import Home from './components/Home/Home';
 
 function App() {
   const [step, setStep] = useState(1); // Step to control the flow
@@ -32,7 +34,7 @@ function App() {
     <div className="App">
       <Router>
         <Routes>
-          <Route path="/" element={
+          <Route path="/home" element={
             <div>
               {step === 1 && <ConnectWallet onWalletConnected={handleWalletConnected} />}
               {step === 2 && walletAddress && <BusinessSearch walletAddress={walletAddress} onBusinessClaimed={handleBusinessClaimed} />}
@@ -40,6 +42,8 @@ function App() {
               {step === 4 && <HomeScreen />}
             </div>
           } />
+          <Route path='/onboard' element={<FormifyProject />} />
+          <Route path='/' element={<Home />} />
         </Routes>
       </Router>
     </div>
