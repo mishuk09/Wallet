@@ -6,7 +6,7 @@ const Home = () => {
         <div className='w-full relative min-h-screen flex flex-col items-center bg-gray-100'>
             {/* Wallet Connect Section */}
             <div className='absolute p-4 top-2 right-2'>
-                <button className='bg-blue-600 hover:bg-blue-500 duration-75 text-sm text-white px-4 py-2 rounded-md'>
+                <button className='bg-blue-500 hover:bg-white hover:text-black hover:ring-1 hover:ring-blue-600 duration-100 transition-all text-white  text-sm   rounded px-4 py-2  '>
                     Wallet Connect
                 </button>
             </div>
@@ -31,7 +31,7 @@ const Home = () => {
                 </p>
 
                 {/* Start Registration Button */}
-                <a href='/register' className='bg-blue-600 hover:bg-blue-500 duration-75 text-white mt-6 px-10 py-3 rounded-md text-lg '>
+                <a href='/register' className='mt-4 w-1/4 bg-blue-500 hover:bg-white hover:text-black hover:ring-1 hover:ring-blue-600 duration-100 transition-all text-white py-2   rounded text-lg '>
                     Start
                 </a>
 

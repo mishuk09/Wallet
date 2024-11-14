@@ -120,9 +120,9 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
 
                 {/* Step 1 */}
                 {step === 1 && (
-                    <div className="text-start relative mt-16 mb-10">
+                    <div className="text-start relative mt-14 mb-8">
                         <h2 className="text-3xl font-semibold mb-4">Select Business on Map</h2>
-                        <p className="text-gray-500 mb-4">👋 Let's start your dream journey</p>
+                        <p className="text-gray-500 mb-2">👋 Let's start your dream journey</p>
 
                         <LoadScript
                             googleMapsApiKey="AIzaSyDOEDZEEqWAyWNyKpBNrhF9Cxti0AfRVDU"
@@ -168,8 +168,8 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
                                     </button>
                                 </div>
                             ) : (
-                                <div className="font-bold mt-6">
-                                    <h3>No Business Selected (Search For Business)</h3>
+                                <div className="font-semibold mt-6">
+                                    <h3>⚠️ No Business Selected </h3>
                                 </div>
                             )}
                         </LoadScript>
