@@ -1,26 +1,23 @@
 import React, { useState, useRef } from "react";
 import { GoogleMap, LoadScript, Marker, StandaloneSearchBox } from "@react-google-maps/api";
 import { db } from "../Firebase/firebase";
-import { collection, doc, updateDoc } from 'firebase/firestore';
+import { collection, doc, setDoc } from 'firebase/firestore';
 
 const mapContainerStyle = { width: "100%", height: "400px" };
 const defaultCenter = { lat: 37.7749, lng: -122.4194 }; // Default to San Francisco
 
-const BusinessSearch = ({ walletAddress, onBusinessSelected }) => {
+const BusinessSearch = ({ walletAddress, onBusinessClaimed }) => {  // Corrected prop name to onBusinessClaimed
     const [selectedBusiness, setSelectedBusiness] = useState(null);
     const [mapCenter, setMapCenter] = useState(defaultCenter);
     const searchBoxRef = useRef(null);
 
-    const handleSearchBoxPlaces = async () => {
+    // Handle search box places
+    const handleSearchBoxPlaces = () => {
         const places = searchBoxRef.current.getPlaces();
         if (places && places.length > 0) {
             const place = places[0];
             const location = place.geometry.location;
 
-            // Log the selected place details for debugging
-            console.log("Selected place details:", place);
-
-            // Fallbacks for missing fields
             const businessDetails = {
                 name: place.name || "No name available",
                 lat: location.lat(),
@@ -28,53 +25,60 @@ const BusinessSearch = ({ walletAddress, onBusinessSelected }) => {
                 phone: place.formatted_phone_number || "Contact not available",
             };
 
-            // Set map center and selected business state
             setMapCenter({
                 lat: location.lat(),
                 lng: location.lng(),
             });
-            setSelectedBusiness(businessDetails);
-
-            // Update Firestore with business details
-            try {
-                const userDocRef = doc(collection(db, "users"), walletAddress);
-                await updateDoc(userDocRef, {
-                    business: businessDetails,
-                    onboardingStep: 2,
-                });
-                onBusinessSelected(businessDetails);
-            } catch (error) {
-                console.error("Error updating Firestore document:", error);
-            }
+            setSelectedBusiness(businessDetails); // Set selected business
         } else {
             console.warn("No places found in search results.");
         }
     };
 
-    const handleMapClick = (event) => {
-        const lat = event.latLng.lat();
-        const lng = event.latLng.lng();
+    // Handle business claim and save to Firestore
+    const handleClaimBusiness = async () => {
+        if (selectedBusiness) {
+            // Store business details in Firestore under `googleMap > userData`
+            try {
+                const userDataCollection = collection(db, "googleMap");
+                const businessDocRef = doc(userDataCollection, walletAddress);
+                await setDoc(businessDocRef, {
+                    business: selectedBusiness,
+                    onboardingStep: 2,
+                });
+                console.log("Business claimed and saved to Firestore successfully.");
 
-        setMapCenter({ lat, lng });
-        setSelectedBusiness((prevBusiness) => ({
-            ...prevBusiness,
-            lat,
-            lng,
-            name: prevBusiness?.name || "Custom Location",
-            phone: prevBusiness?.phone || "N/A",
-        }));
+                // Trigger the callback to parent to move to the next step
+                if (onBusinessClaimed) {
+                    onBusinessClaimed(selectedBusiness);  // Pass selected business details back to parent
+                }
+            } catch (error) {
+                console.error("Error storing business data in Firestore:", error);
+            }
+        }
     };
 
     return (
         <LoadScript
-            googleMapsApiKey="AIzaSyDOEDZEEqWAyWNyKpBNrhF9Cxti0AfRVDU"  // Replace with your actual API key
+            googleMapsApiKey="AIzaSyDOEDZEEqWAyWNyKpBNrhF9Cxti0AfRVDU"
             libraries={["places"]}
         >
             <GoogleMap
                 mapContainerStyle={mapContainerStyle}
                 zoom={12}
                 center={mapCenter}
-                onClick={handleMapClick}
+                onClick={(event) => {
+                    const lat = event.latLng.lat();
+                    const lng = event.latLng.lng();
+                    setMapCenter({ lat, lng });
+                    setSelectedBusiness((prevBusiness) => ({
+                        ...prevBusiness,
+                        lat,
+                        lng,
+                        name: prevBusiness?.name || "Custom Location",
+                        phone: prevBusiness?.phone || "N/A",
+                    }));
+                }}
             >
                 <StandaloneSearchBox
                     onLoad={(ref) => (searchBoxRef.current = ref)}
@@ -104,7 +108,12 @@ const BusinessSearch = ({ walletAddress, onBusinessSelected }) => {
                     <p><span className="font-semibold">Contact:</span> {selectedBusiness.phone}</p>
                     <p><span className="font-semibold">Latitude:</span> {selectedBusiness.lat}</p>
                     <p><span className="font-semibold">Longitude:</span> {selectedBusiness.lng}</p>
-                    <button className="w-1/2 p-2 bg-blue-600 rounded text-white mt-6" onClick={() => onBusinessSelected(selectedBusiness)}>Claim this Business</button>
+                    <button
+                        className="w-1/2 p-2 bg-blue-600 rounded text-white mt-6"
+                        onClick={handleClaimBusiness} // Save to Firestore on button click
+                    >
+                        Claim this Business
+                    </button>
                 </div>
             ) : (
                 <div>
