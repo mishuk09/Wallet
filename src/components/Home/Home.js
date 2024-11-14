@@ -6,13 +6,13 @@ const Home = () => {
         <div className='w-full relative min-h-screen flex flex-col items-center bg-gray-100'>
             {/* Wallet Connect Section */}
             <div className='absolute p-4 top-2 right-2'>
-                <button className='bg-blue-500 text-sm text-white px-4 py-2 rounded-md'>
+                <button className='bg-blue-600 hover:bg-blue-500 duration-75 text-sm text-white px-4 py-2 rounded-md'>
                     Wallet Connect
                 </button>
             </div>
 
             {/* Main Content */}
-            <div className='flex flex-col items-center justify-center mt-24'>
+            <div className='flex flex-col items-center justify-center mt-36'>
                 {/* Home Title */}
                 <h1 className='text-5xl font-bold text-gray-800'>
                     👋 Welcome to Crypto
@@ -20,20 +20,20 @@ const Home = () => {
                         Wallet
                         {/* Image Below Wallet Text */}
                         <div className='mt-[-10px]'>
-                            <img src={underimg} alt="Under Image" className='w-[200px] h-auto' />
+                            <img src={underimg} alt="undereffect" className='w-[200px] h-auto' />
                         </div>
                     </span>
                 </h1>
 
                 {/* Description */}
-                <p className='text-gray-600 mt-6 font-semibold text-sm mb-4 px-4 text-center'>
+                <p className='text-gray-600 mt-4 font-semibold text-sm mb-4 px-4 text-center'>
                     Connect your wallet to start interacting with your crypto assets.
                 </p>
 
                 {/* Start Registration Button */}
-                <button className='bg-blue-500 hover:bg-blue-600 duration-75 text-white mt-6 px-10 py-3 rounded-md text-lg '>
+                <a href='/register' className='bg-blue-600 hover:bg-blue-500 duration-75 text-white mt-6 px-10 py-3 rounded-md text-lg '>
                     Start
-                </button>
+                </a>
 
                 {/* Verified Businesses Map Section */}
                 <div className='w-full mt-12 mb-10'>

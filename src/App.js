@@ -42,7 +42,7 @@ function App() {
               {step === 4 && <HomeScreen />}
             </div>
           } />
-          <Route path='/onboard' element={<FormifyProject />} />
+          <Route path='/register' element={<FormifyProject />} />
           <Route path='/' element={<Home />} />
         </Routes>
       </Router>
