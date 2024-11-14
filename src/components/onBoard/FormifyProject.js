@@ -155,18 +155,36 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
                             </GoogleMap>
 
                             {selectedBusiness ? (
-                                <div className="  mt-6 mb-10">
-                                    <h3><span className="font-semibold">Selected Business:</span> {selectedBusiness.name}</h3>
-                                    <p><span className="font-semibold">Contact:</span> {selectedBusiness.phone}</p>
-                                    <p><span className="font-semibold">Latitude:</span> {selectedBusiness.lat}</p>
-                                    <p><span className="font-semibold">Longitude:</span> {selectedBusiness.lng}</p>
+                                <div className="mt-6 mb-10">
+                                    <div className="flex flex-col gap-4 ">
+                                        <div className="flex gap-10">
+
+                                            <h3 className="text-lg">
+                                                <span className="font-semibold">📌 Selected Business:</span> {selectedBusiness.name}
+                                            </h3>
+                                            <p>
+                                                <span className="font-semibold">📞 Contact:</span> {selectedBusiness.phone}
+                                            </p>
+                                        </div>
+                                        <div className="flex gap-10">
+
+
+                                            <p>
+                                                <span className="font-semibold">🌍 Latitude:</span> {selectedBusiness.lat}
+                                            </p>
+                                            <p>
+                                                <span className="font-semibold">📍 Longitude:</span> {selectedBusiness.lng}
+                                            </p>
+                                        </div>
+                                    </div>
                                     <button
-                                        className="  w-1/4  bg-blue-500 hover:bg-white hover:text-black hover:ring-1 hover:ring-blue-600 duration-100 transition-all text-white py-2   rounded mt-6"
+                                        className="w-1/4 bg-blue-500 hover:bg-white hover:text-black hover:ring-1 hover:ring-blue-600 duration-100 transition-all text-white py-2 rounded mt-6"
                                         onClick={handleClaimBusiness} // Save to Firestore on button click
                                     >
-                                        Claim this Business
+                                        ✨ Claim this Business
                                     </button>
                                 </div>
+
                             ) : (
                                 <div className="font-semibold mt-6">
                                     <h3>⚠️ No Business Selected </h3>
