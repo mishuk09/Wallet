@@ -40,10 +40,22 @@ const ConnectWallet = ({ onWalletConnected }) => {
     };
 
     return (
-        <div>
-            <button onClick={connectWallet}>Connect Wallet</button>
-            {walletAddress && <p>Wallet Connected: {walletAddress}</p>}
+        <div className="flex flex-col items-center justify-center h-screen">
+            <button
+                onClick={connectWallet}
+                className="flex items-center justify-center px-6 w-1/2 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+            >
+                Connect Wallet
+                <img
+                    src="https://images.ctfassets.net/9sy2a0egs6zh/1aBiNLUwIFbHSCkLHZHNHx/b67214bf14b6c8cb721ce0acb60ef51c/Snaps-Security-Fox.svg"
+                    alt="MetaMask Icon"
+                    className="ml-2 h-6 w-6"  // `ml-2` adds margin to the left of the icon to give space between the text and icon
+                />
+            </button>
+            {walletAddress && <p className="mt-4 text-xl text-gray-700"><span className="font-bold">Wallet Connected:</span> {walletAddress}</p>}
         </div>
+
+
     );
 };
 
