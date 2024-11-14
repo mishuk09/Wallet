@@ -1,11 +1,10 @@
 import React, { useState } from "react";
 import { ethers } from "ethers"; // Import ethers
 import { db } from "../Firebase/firebase"; // Correct the import path
-import { collection, setDoc, doc } from "firebase/firestore"; // Correct Firestore imports
+import {   setDoc, doc } from "firebase/firestore"; // Correct Firestore imports
 
 const ConnectWallet = ({ onWalletConnected }) => {
     const [walletAddress, setWalletAddress] = useState("");
-    const [error, setError] = useState('');
     const [walletNotDetected, setWalletNotDetected] = useState(false); // Add state for checking MetaMask
 
     const connectWallet = async () => {

@@ -113,7 +113,7 @@ const BusinessSearch = ({ walletAddress, onBusinessClaimed }) => {
             </GoogleMap>
 
             {selectedBusiness ? (
-                <div className="container mt-6 mb-10">
+                <div className="  mt-6 mb-10">
                     <h3><span className="font-semibold">Selected Business:</span> {selectedBusiness.name}</h3>
                     <p><span className="font-semibold">Contact:</span> {selectedBusiness.phone}</p>
                     <p><span className="font-semibold">Latitude:</span> {selectedBusiness.lat}</p>
