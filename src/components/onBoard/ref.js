@@ -34,7 +34,7 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
 
             const businessDetails = {
                 name: place.name || "No name available",
-                address: place.formatted_address || "Address Not found",
+                address: place.formatted_address || "Address not available",
                 lat: location.lat(),
                 lng: location.lng(),
                 phone: place.formatted_phone_number || "Contact not available",
@@ -126,14 +126,13 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
 
                 {/* Step 1 */}
                 {step === 1 && (
-                    <div className="text-start relative mt-14   mb-8">
+                    <div className="text-start relative mt-14 mb-8">
                         <h2 className="text-3xl font-semibold mb-4">Select Business on Map</h2>
                         <p className="text-gray-500 mb-2">👋 Let's start your dream journey</p>
 
                         <LoadScript
                             googleMapsApiKey="AIzaSyDOEDZEEqWAyWNyKpBNrhF9Cxti0AfRVDU"
                             libraries={["places"]}
-                           
                         >
                             {/* Search Box - Positioned outside of GoogleMap */}
                             <div className="search-box-container   " style={{ position: "relative", top: "50px", left: "60%", transform: "translateX(-50%)", zIndex: 1, width: "70%" }}>
@@ -186,21 +185,21 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
                                 </div>
 
                             ) : (
-                                <div className="font-semibold mt-6 pb-10">
+                                <div className="font-semibold mt-6">
                                     <h3>⚠️ No Business Selected </h3>
                                 </div>
                             )}
                         </LoadScript>
 
-
                         <button
                             onClick={handleNext}
-                            className={`w-1/4 absolute bottom-0 right-0 mt-4 bg-blue-500 hover:bg-white hover:text-black hover:ring-1 hover:ring-blue-600 duration-100 transition-all text-white py-2 rounded ${isBusinessClaimed ? '' : 'opacity-50 cursor-not-allowed'
+                            className={`w-1/4 absolute right-0 mt-4 bg-blue-500 hover:bg-white hover:text-black hover:ring-1 hover:ring-blue-600 duration-100 transition-all text-white py-2 rounded ${isBusinessClaimed ? '' : 'opacity-50 cursor-not-allowed'
                                 }`}
                             disabled={!isBusinessClaimed} // Disable until business is claimed
                         >
                             Next
                         </button>
+
                         {/* <button onClick={handleNext} className="w-1/4 absolute right-0  mt-4 bg-blue-500 hover:bg-white hover:text-black hover:ring-1 hover:ring-blue-600 duration-100 transition-all text-white py-2   rounded">Next</button> */}
                     </div>
                 )}
