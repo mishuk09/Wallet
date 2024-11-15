@@ -108,7 +108,7 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
                     <div className="flex items-center space-x-2">
                         {/* Only display the current step */}
                         {step === 1 && <span className="text-2xl flex items-center font-bold text-gray-800">Step 1 <span className="text-gray-600 ms-8  text-xl font-semibold">Select Business on Map</span></span>}
-                        {step === 2 && <span className="text-2xl font-bold text-gray-800">Step 2</span>}
+                        {step === 2 && <span className="text-2xl font-bold text-gray-800">Step 2 <span className="text-gray-600 ms-8  text-xl font-semibold">Create your Account</span></span>}
                         {step === 3 && <span className="text-2xl font-bold text-gray-800">Step 3</span>}
                         {step === 4 && <span className="text-2xl font-bold text-gray-800">Step 4</span>}
                         {step === 5 && <span className="text-2xl font-bold text-gray-800">Step 5</span>}
@@ -133,7 +133,7 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
                         <LoadScript
                             googleMapsApiKey="AIzaSyDOEDZEEqWAyWNyKpBNrhF9Cxti0AfRVDU"
                             libraries={["places"]}
-                           
+
                         >
                             {/* Search Box - Positioned outside of GoogleMap */}
                             <div className="search-box-container   " style={{ position: "relative", top: "50px", left: "60%", transform: "translateX(-50%)", zIndex: 1, width: "70%" }}>
@@ -176,7 +176,7 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
                                     </div>
 
                                     <button
-                                        className={`w-1/4 bg-blue-500 hover:bg-white hover:text-black hover:ring-1 hover:ring-blue-600 duration-100 transition-all text-white py-2 rounded mt-6 ${loading ? 'opacity-50 cursor-not-allowed' : ''
+                                        className={`w-1/4  btn-style  mt-6 ${loading ? 'opacity-50 cursor-not-allowed' : ''
                                             }`}
                                         onClick={handleClaimBusiness}
                                         disabled={loading} // Disable button while saving
@@ -195,7 +195,7 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
 
                         <button
                             onClick={handleNext}
-                            className={`w-1/4 absolute bottom-0 right-0 mt-4 bg-blue-500 hover:bg-white hover:text-black hover:ring-1 hover:ring-blue-600 duration-100 transition-all text-white py-2 rounded ${isBusinessClaimed ? '' : 'opacity-50 cursor-not-allowed'
+                            className={`w-1/4 absolute text-sm bottom-0 right-0 mt-4 btn-style ${isBusinessClaimed ? '' : 'opacity-50 cursor-not-allowed'
                                 }`}
                             disabled={!isBusinessClaimed} // Disable until business is claimed
                         >
@@ -207,26 +207,28 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
 
                 {/* Step 2 */}
                 {step === 2 && (
-                    <div>
-                        <h2 className="text-2xl font-bold mb-4">Set work preferences</h2>
-                        <p className="text-gray-500 mb-4">Choose at least 3 interests to get started.</p>
+                    <div className="text-start relative mt-14   mb-8">
+                        <h2 className="text-3xl font-semibold mb-4">Create your Account</h2>
+                        <p className="text-gray-500 mb-2">👋 Let's start your dream journey</p>
 
-                        <form className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">First Name *</label>
-                                <input type="text" placeholder="Enter name here" className="mt-1 p-2 border border-gray-300 rounded w-full" />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Last Name *</label>
-                                <input type="text" placeholder="Enter name here" className="mt-1 p-2 border border-gray-300 rounded w-full" />
+                        <form className="space-y-4 mb-6 mt-6">
+                            <div className="flex gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">First Name *</label>
+                                    <input type="text" placeholder="Enter name here" className="mt-1 p-2 border text-sm border-gray-300 rounded w-full" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Last Name *</label>
+                                    <input type="text" placeholder="Enter name here" className="mt-1 p-2 border text-sm border-gray-300 rounded w-full" />
+                                </div>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Email *</label>
-                                <input type="email" placeholder="Work email" className="mt-1 p-2 border border-gray-300 rounded w-full" />
+                                <input type="email" placeholder="Work email" className="mt-1 p-2 border text-sm border-gray-300 rounded w-full" />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Tell us about what you do</label>
-                                <input type="text" placeholder="Enter your tagline..." className="mt-1 p-2 border border-gray-300 rounded w-full" />
+                                <label className="block text-sm font-medium text-gray-700">Phone *</label>
+                                <input type="text" placeholder="Enter phone" className="mt-1 p-2 border text-sm border-gray-300 rounded w-full" />
                             </div>
                         </form>
                         <div className="flex justify-between">
@@ -244,7 +246,7 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
                         <form className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Experience</label>
-                                <textarea placeholder="Share your experience..." className="mt-1 p-2 border border-gray-300 rounded w-full" />
+                                <textarea placeholder="Share your experience..." className="mt-1 p-2 border text-sm border-gray-300 rounded w-full" />
                             </div>
                         </form>
                         <div className="flex justify-between">
@@ -262,11 +264,11 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
                         <form className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Password</label>
-                                <input type="password" placeholder="Enter password" className="mt-1 p-2 border border-gray-300 rounded w-full" />
+                                <input type="password" placeholder="Enter password" className="mt-1 p-2 border text-sm border-gray-300 rounded w-full" />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Confirm Password</label>
-                                <input type="password" placeholder="Confirm password" className="mt-1 p-2 border border-gray-300 rounded w-full" />
+                                <input type="password" placeholder="Confirm password" className="mt-1 p-2 border text-sm border-gray-300 rounded w-full" />
                             </div>
                         </form>
                         <div className="flex justify-between">

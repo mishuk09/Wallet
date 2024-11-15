@@ -15,3 +15,24 @@ code {
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+
+
+
+.btn-style{
+  background-color:#3b82f6;
+  color: white;
+  border-radius: 5px;
+  font-size: 14px;
+  padding: 9px;
+  border: 2px solid #3b82f6;
+  transition: 0.3s all ;
+}
+.btn-style:hover{
+  background-color:white;
+  color: #101010;
+  border-radius: 5px;
+  border: 2px solid #3b82f6;
+  transition: 0.3s ease-in-out;
+}
