@@ -2,12 +2,15 @@ import React, { useState, useRef } from "react";
 import { GoogleMap, LoadScript, Marker, StandaloneSearchBox } from "@react-google-maps/api";
 import { db } from "../Firebase/firebase";
 import { collection, doc, setDoc } from 'firebase/firestore';
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useAccount } from "wagmi";
 
 const mapContainerStyle = { width: "100%", height: "400px" };
 const defaultCenter = { lat: 37.7749, lng: -122.4194 }; // Default to San Francisco
 
 
 function FormifyProject({ walletAddress, onBusinessClaimed }) {
+
     const searchBoxRef = useRef(null);
     const [step, setStep] = useState(1);
     const [selectedBusiness, setSelectedBusiness] = useState(null);
@@ -15,6 +18,10 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
     const [isBusinessClaimed, setIsBusinessClaimed] = useState(false); // Track claim status
     const [loading, setLoading] = useState(false);
     const [storeId, setStoreId] = useState(null);
+
+    //step 3 state management
+
+    const { address, isConnected, chain } = useAccount;
 
 
     //state for control empty input and next btn enabling
@@ -152,21 +159,60 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
     // Handle business claim and save to Firestore
 
 
+    // const handleClaimBusiness = async () => {
+    //     setLoading(true);
+    //     if (selectedBusiness) {
+    //         try {
+    //             const userDataCollection = collection(db, "stores");
+
+    //             // Generate a new document reference with an auto-generated ID
+    //             const businessDocRef = doc(userDataCollection);
+    //             const storeId = businessDocRef.id; // Firestore-generated unique ID
+
+    //             // Save the business claim data with the generated store ID
+    //             await setDoc(businessDocRef, {
+    //                 business: selectedBusiness,
+    //                 onboardingStep: 2,
+    //                 storeId, // Save the store ID as part of the store document
+    //                 wallet_chain: chain?.name,
+    //                 wallet_address: address
+    //             });
+
+    //             setIsBusinessClaimed(true);
+    //             console.log("Business claimed and saved to Firestore with store ID:", storeId);
+
+    //             if (onBusinessClaimed) {
+    //                 onBusinessClaimed({ ...selectedBusiness, storeId }); // Pass store ID to parent
+    //             }
+
+    //             // Save the storeId to state or context for later use in Step 2
+    //             setStoreId(storeId);
+    //         } catch (error) {
+    //             console.error("Error storing business data in Firestore:", error);
+    //         } finally {
+    //             setLoading(false);
+    //         }
+    //     }
+    // };
     const handleClaimBusiness = async () => {
         setLoading(true);
         if (selectedBusiness) {
             try {
                 const userDataCollection = collection(db, "stores");
-
-                // Generate a new document reference with an auto-generated ID
                 const businessDocRef = doc(userDataCollection);
-                const storeId = businessDocRef.id; // Firestore-generated unique ID
+                const storeId = businessDocRef.id;
 
-                // Save the business claim data with the generated store ID
+                // Check for address and chain
+                const walletAddress = address || "unknown"; // Set default if undefined
+                const walletChain = chain ? chain.name : "unknown"; // Set default if undefined
+
+                // Save the business claim data with wallet info
                 await setDoc(businessDocRef, {
                     business: selectedBusiness,
                     onboardingStep: 2,
-                    storeId, // Save the store ID as part of the store document
+                    storeId,
+                    wallet_chain: walletChain, // Use the checked variable
+                    wallet_address: walletAddress // Use the checked variable
                 });
 
                 setIsBusinessClaimed(true);
@@ -176,7 +222,6 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
                     onBusinessClaimed({ ...selectedBusiness, storeId }); // Pass store ID to parent
                 }
 
-                // Save the storeId to state or context for later use in Step 2
                 setStoreId(storeId);
             } catch (error) {
                 console.error("Error storing business data in Firestore:", error);
@@ -185,7 +230,6 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
             }
         }
     };
-
 
     return (
         <div className="flex   bg-gray-100">
@@ -205,7 +249,7 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
                         {/* Only display the current step */}
                         {step === 1 && <span className="text-2xl flex items-center font-bold text-gray-800">Step 1 <span className="text-gray-600 ms-8  text-xl font-semibold">Select Business on Map</span></span>}
                         {step === 2 && <span className="text-2xl font-bold text-gray-800">Step 2 <span className="text-gray-600 ms-8  text-xl font-semibold">Fill out the form if you are business Owner</span></span>}
-                        {step === 3 && <span className="text-2xl font-bold text-gray-800">Step 3</span>}
+                        {step === 3 && <span className="text-2xl font-bold text-gray-800">Step 3 <span className="text-gray-600 ms-8  text-xl font-semibold">Connect to crypto wallet</span></span>}
                         {step === 4 && <span className="text-2xl font-bold text-gray-800">Step 4</span>}
                         {step === 5 && <span className="text-2xl font-bold text-gray-800">Step 5</span>}
                     </div>
@@ -382,20 +426,34 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
 
                 {/* Step 3 */}
                 {step === 3 && (
-                    <div>
-                        <h2 className="text-2xl font-bold mb-4">Complete your profile</h2>
-                        <p className="text-gray-500 mb-4">Tell us more about your experience</p>
-                        <form className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Experience</label>
-                                <textarea placeholder="Share your experience..." className="mt-1 p-2 border text-sm border-gray-300 rounded w-full" />
-                            </div>
-                        </form>
-                        <div className="flex justify-between">
-                            <button onClick={handlePrevious} className="bg-gray-200 text-gray-700 py-2 px-4 rounded">Previous</button>
-                            <button onClick={handleNext} className="bg-blue-500 text-white py-2 px-4 rounded">Next</button>
+                    <div className="text-start relative mt-14  ">
+                        <h2 className="text-2xl font-semibold mb-4">Connect a crypto wallet</h2>
+                        <p className="text-gray-500 mb-2">👋 This will be your wallet address for USDC payments</p>
+
+                        <div className="mt-10">
+
+                            <ConnectButton />
                         </div>
+
+                        <div className="flex justify-between pt-4">
+                            <button
+                                onClick={handlePrevious}
+                                type="button"
+                                className="btn-style w-1/4 rounded">Previous</button>
+
+                            <button
+                                onClick={handleClaimBusiness} // Call handleClaimBusiness on button click
+                                className={`btn-style w-1/4 rounded ${!isConnected ? "opacity-50 cursor-not-allowed" : ""}`}
+                                disabled={!isConnected}
+                            >
+                                Next
+                            </button>
+                        </div>
+
                     </div>
+
+
+
                 )}
 
                 {/* Step 4 */}
