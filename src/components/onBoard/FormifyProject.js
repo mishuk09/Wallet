@@ -127,7 +127,7 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
                 {/* Step 1 */}
                 {step === 1 && (
                     <div className="text-start relative mt-14   mb-8">
-                        <h2 className="text-3xl font-semibold mb-4">Select Business on Map</h2>
+                        <h2 className="text-2xl font-semibold mb-4">Select Business on Map</h2>
                         <p className="text-gray-500 mb-2">👋 Let's start your dream journey</p>
 
                         <LoadScript
@@ -208,32 +208,43 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
                 {/* Step 2 */}
                 {step === 2 && (
                     <div className="text-start relative mt-14   mb-8">
-                        <h2 className="text-3xl font-semibold mb-4">Create your Account</h2>
+                        <h2 className="text-2xl font-semibold mb-4">Create your Account</h2>
                         <p className="text-gray-500 mb-2">👋 Let's start your dream journey</p>
 
                         <form className="space-y-4 mb-6 mt-6">
-                            <div className="flex gap-4">
-                                <div>
+                            <div className="flex w-full gap-4">
+                                <div className="w-full">
                                     <label className="block text-sm font-medium text-gray-700">First Name *</label>
-                                    <input type="text" placeholder="Enter name here" className="mt-1 p-2 border text-sm border-gray-300 rounded w-full" />
+                                    <input type="text" placeholder="Enter name here" className="mt-1 p-2 border text-sm border-gray-300 rounded w-full focus:ring-1 focus:ring-blue-600 focus:outline-none" />
                                 </div>
-                                <div>
+                                <div className="w-full">
                                     <label className="block text-sm font-medium text-gray-700">Last Name *</label>
-                                    <input type="text" placeholder="Enter name here" className="mt-1 p-2 border text-sm border-gray-300 rounded w-full" />
+                                    <input type="text" placeholder="Enter name here" className="mt-1 p-2 border text-sm border-gray-300 rounded w-full focus:ring-1 focus:ring-blue-600 focus:outline-none" />
                                 </div>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Email *</label>
-                                <input type="email" placeholder="Work email" className="mt-1 p-2 border text-sm border-gray-300 rounded w-full" />
+                                <input type="email" placeholder="Work email" className="mt-1 p-2 border text-sm border-gray-300 rounded w-full focus:ring-1 focus:ring-blue-600 focus:outline-none" />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Phone *</label>
-                                <input type="text" placeholder="Enter phone" className="mt-1 p-2 border text-sm border-gray-300 rounded w-full" />
+                                <input type="text" placeholder="Enter phone" className="mt-1 p-2 border text-sm border-gray-300 rounded w-full focus:ring-1 focus:ring-blue-600 focus:outline-none" />
                             </div>
                         </form>
-                        <div className="flex justify-between">
-                            <button onClick={handlePrevious} className="bg-gray-200 text-gray-700 py-2 px-4 rounded">Previous</button>
-                            <button onClick={handleNext} className="bg-blue-500 text-white py-2 px-4 rounded">Next</button>
+                        <div className="flex justify-between mt-10">
+
+                            <button
+                                onClick={handlePrevious}
+                                className="btn-style w-1/4 rounded">Previous</button>
+
+                            <button
+                                onClick={handleNext}
+                                className={`w-1/4 absolute text-sm bottom-0 right-0 mt-4 btn-style ${isBusinessClaimed ? '' : 'opacity-50 cursor-not-allowed'
+                                    }`}
+                                disabled={!isBusinessClaimed} // Disable until business is claimed
+                            >
+                                Next
+                            </button>
                         </div>
                     </div>
                 )}
