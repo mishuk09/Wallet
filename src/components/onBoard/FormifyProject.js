@@ -8,12 +8,33 @@ const defaultCenter = { lat: 37.7749, lng: -122.4194 }; // Default to San Franci
 
 
 function FormifyProject({ walletAddress, onBusinessClaimed }) {
+    const searchBoxRef = useRef(null);
     const [step, setStep] = useState(1);
     const [selectedBusiness, setSelectedBusiness] = useState(null);
     const [mapCenter, setMapCenter] = useState(defaultCenter);
     const [isBusinessClaimed, setIsBusinessClaimed] = useState(false); // Track claim status
     const [loading, setLoading] = useState(false);
-    const searchBoxRef = useRef(null);
+    const [storeId, setStoreId] = useState(null);
+
+
+    //state for control empty input and next btn enabling
+    const [formData, setFormData] = useState({
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+    })
+
+
+    const isFormValid = Object.values(formData).every((value) => value.trim() !== "");
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prevData) => ({
+            ...prevData,
+            [name]: value,
+        }));
+    };
 
     const handleNext = () => {
         setStep(step + 1);
@@ -23,6 +44,43 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
         setStep(step - 1);
     };
 
+    const handleSaveOwnerData = async (ownerData) => {
+        try {
+            const usersCollection = collection(db, "users");
+
+            // Use the same storeId as the document ID for consistency across collections
+            const userDocRef = doc(usersCollection, storeId);
+
+            await setDoc(userDocRef, ownerData, { merge: true }); // Save or merge the owner data
+            console.log("Owner data saved successfully to Firestore with store ID:", storeId);
+        } catch (error) {
+            console.error("Error saving owner data to Firestore:", error);
+        }
+    };
+
+
+    // Step 2 submission handler
+    const handleSubmitStep2 = async (e) => {
+        e.preventDefault();
+
+        // Ensure storeId is available
+        if (!storeId) {
+            console.error("Store ID is not available. Please claim the business first.");
+            return;
+        }
+
+        // Gather owner data from the form
+        const ownerData = {
+            firstName: e.target.firstName.value,
+            lastName: e.target.lastName.value,
+            email: e.target.email.value,
+            phone: e.target.phone.value,
+            associatedStore: storeId, // Link the user to the claimed store
+        };
+
+        await handleSaveOwnerData(ownerData); // Save owner data
+        handleNext(); // Move to the next step
+    };
 
 
     // Handle search box places
@@ -68,24 +126,62 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
     };
 
     // Handle business claim and save to Firestore
+    // const handleClaimBusiness = async () => {
+    //     setLoading(true);
+    //     if (selectedBusiness) {
+    //         try {
+    //             const userDataCollection = collection(db, "stores");
+    //             const businessDocRef = doc(userDataCollection, walletAddress);
+    //             await setDoc(businessDocRef, {
+    //                 business: selectedBusiness,
+    //                 onboardingStep: 2,
+    //             });
+    //             setIsBusinessClaimed(true);
+    //             console.log("Business claimed and saved to Firestore successfully.");
+
+    //             if (onBusinessClaimed) {
+    //                 onBusinessClaimed(selectedBusiness); // Pass selected business details back to parent
+    //             }
+    //         } catch (error) {
+    //             console.error("Error storing business data in Firestore:", error);
+    //         }
+    //     }
+    // };
+
+
+    // Handle business claim and save to Firestore
+
+
     const handleClaimBusiness = async () => {
         setLoading(true);
         if (selectedBusiness) {
             try {
-                const userDataCollection = collection(db, "googleMap");
-                const businessDocRef = doc(userDataCollection, walletAddress);
+                const userDataCollection = collection(db, "stores");
+
+                // Generate a new document reference with an auto-generated ID
+                const businessDocRef = doc(userDataCollection);
+                const storeId = businessDocRef.id; // Firestore-generated unique ID
+
+                // Save the business claim data with the generated store ID
                 await setDoc(businessDocRef, {
                     business: selectedBusiness,
                     onboardingStep: 2,
+                    storeId, // Save the store ID as part of the store document
                 });
+
                 setIsBusinessClaimed(true);
-                console.log("Business claimed and saved to Firestore successfully.");
+                console.log("Business claimed and saved to Firestore with store ID:", storeId);
 
                 if (onBusinessClaimed) {
-                    onBusinessClaimed(selectedBusiness); // Pass selected business details back to parent
+                    onBusinessClaimed({ ...selectedBusiness, storeId }); // Pass store ID to parent
                 }
+
+                // Save the storeId to state or context for later use in Step 2
+                setStoreId(storeId);
             } catch (error) {
                 console.error("Error storing business data in Firestore:", error);
+            } finally {
+                setLoading(false);
             }
         }
     };
@@ -93,7 +189,7 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
 
     return (
         <div className="flex   bg-gray-100">
-            <div className="w-1/3 h-auto bg-gradient-to-t from-[#0a091a] via-[#161330] to-[#0a091a] text-white flex flex-col text-start  pt-[200px]  px-8">
+            <div className="w-1/3 lg:h-auto 2xl:h-screen bg-gradient-to-t from-[#0a091a] via-[#161330] to-[#0a091a] text-white flex flex-col text-start  pt-[200px]  px-8">
                 <h1 className="text-4xl font-semibold mb-6 leading-2">Welcome to Crypto Wallet!</h1>
                 <p className="text-gray-300   mb-6">
                     Connect your wallet to start interacting with your crypto assets.
@@ -103,12 +199,12 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
 
             </div>
 
-            <div className="w-2/3  bg-white p-14">
+            <div className="w-2/3  bg-white px-14 pt-14">
                 <div className="">
                     <div className="flex items-center space-x-2">
                         {/* Only display the current step */}
                         {step === 1 && <span className="text-2xl flex items-center font-bold text-gray-800">Step 1 <span className="text-gray-600 ms-8  text-xl font-semibold">Select Business on Map</span></span>}
-                        {step === 2 && <span className="text-2xl font-bold text-gray-800">Step 2 <span className="text-gray-600 ms-8  text-xl font-semibold">Create your Account</span></span>}
+                        {step === 2 && <span className="text-2xl font-bold text-gray-800">Step 2 <span className="text-gray-600 ms-8  text-xl font-semibold">Fill out the form if you are business Owner</span></span>}
                         {step === 3 && <span className="text-2xl font-bold text-gray-800">Step 3</span>}
                         {step === 4 && <span className="text-2xl font-bold text-gray-800">Step 4</span>}
                         {step === 5 && <span className="text-2xl font-bold text-gray-800">Step 5</span>}
@@ -142,6 +238,10 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
                                     onPlacesChanged={handleSearchBoxPlaces}
                                 >
                                     <input type="text" className="p-2 border rounded w-full sm:w-3/4 lg:w-2/4" placeholder="Search for businesses" />
+
+
+
+
 
 
                                 </StandaloneSearchBox>
@@ -201,51 +301,82 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
                         >
                             Next
                         </button>
-                        {/* <button onClick={handleNext} className="w-1/4 absolute right-0  mt-4 bg-blue-500 hover:bg-white hover:text-black hover:ring-1 hover:ring-blue-600 duration-100 transition-all text-white py-2   rounded">Next</button> */}
                     </div>
                 )}
 
                 {/* Step 2 */}
                 {step === 2 && (
-                    <div className="text-start relative mt-14   mb-8">
-                        <h2 className="text-2xl font-semibold mb-4">Create your Account</h2>
+                    <div className="text-start relative mt-14  ">
+                        <h2 className="text-2xl font-semibold mb-4">Fill out the form if you are business owner and want to accept USDC in your business</h2>
                         <p className="text-gray-500 mb-2">👋 Let's start your dream journey</p>
 
-                        <form className="space-y-4 mb-6 mt-6">
+                        <form className="space-y-4 mb-6 mt-6" onSubmit={handleSubmitStep2}>
                             <div className="flex w-full gap-4">
                                 <div className="w-full">
                                     <label className="block text-sm font-medium text-gray-700">First Name *</label>
-                                    <input type="text" placeholder="Enter name here" className="mt-1 p-2 border text-sm border-gray-300 rounded w-full focus:ring-1 focus:ring-blue-600 focus:outline-none" />
+                                    <input
+                                        name="firstName"
+                                        type="text"
+                                        placeholder="Enter name here"
+                                        className="mt-1 p-2 border text-sm border-gray-300 rounded w-full focus:ring-1 focus:ring-blue-600 focus:outline-none"
+                                        value={formData.firstName}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
                                 </div>
                                 <div className="w-full">
                                     <label className="block text-sm font-medium text-gray-700">Last Name *</label>
-                                    <input type="text" placeholder="Enter name here" className="mt-1 p-2 border text-sm border-gray-300 rounded w-full focus:ring-1 focus:ring-blue-600 focus:outline-none" />
+                                    <input
+                                        name="lastName"
+                                        type="text"
+                                        placeholder="Enter name here"
+                                        className="mt-1 p-2 border text-sm border-gray-300 rounded w-full focus:ring-1 focus:ring-blue-600 focus:outline-none"
+                                        value={formData.lastName}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
                                 </div>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Email *</label>
-                                <input type="email" placeholder="Work email" className="mt-1 p-2 border text-sm border-gray-300 rounded w-full focus:ring-1 focus:ring-blue-600 focus:outline-none" />
+                                <input
+                                    name="email"
+                                    type="email"
+                                    placeholder="Work email"
+                                    className="mt-1 p-2 border text-sm border-gray-300 rounded w-full focus:ring-1 focus:ring-blue-600 focus:outline-none"
+                                    value={formData.email}
+                                    onChange={handleInputChange}
+                                    required
+                                />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Phone *</label>
-                                <input type="text" placeholder="Enter phone" className="mt-1 p-2 border text-sm border-gray-300 rounded w-full focus:ring-1 focus:ring-blue-600 focus:outline-none" />
+                                <input
+                                    name="phone"
+                                    type="text"
+                                    placeholder="Enter phone"
+                                    className="mt-1 p-2 border text-sm border-gray-300 rounded w-full focus:ring-1 focus:ring-blue-600 focus:outline-none"
+                                    value={formData.phone}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </div>
+
+                            <div className="flex justify-between pt-4">
+                                <button
+                                    onClick={handlePrevious}
+                                    type="button"
+                                    className="btn-style w-1/4 rounded">Previous</button>
+
+                                <button
+                                    type="submit"
+                                    className={`btn-style w-1/4 rounded ${!isFormValid ? "opacity-50 cursor-not-allowed" : ""}`}
+                                    disabled={!isFormValid}
+                                >
+                                    Next
+                                </button>
                             </div>
                         </form>
-                        <div className="flex justify-between mt-10">
-
-                            <button
-                                onClick={handlePrevious}
-                                className="btn-style w-1/4 rounded">Previous</button>
-
-                            <button
-                                onClick={handleNext}
-                                className={`w-1/4 absolute text-sm bottom-0 right-0 mt-4 btn-style ${isBusinessClaimed ? '' : 'opacity-50 cursor-not-allowed'
-                                    }`}
-                                disabled={!isBusinessClaimed} // Disable until business is claimed
-                            >
-                                Next
-                            </button>
-                        </div>
                     </div>
                 )}
 

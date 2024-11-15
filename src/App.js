@@ -1,10 +1,6 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import './App.css';
-import BusinessSearch from './components/GoogleMap/BusinessSearch';
-import { useState } from 'react';
-import ConnectWallet from './components/Wallet/ConnectWallet';
-import HomeScreen from './components/Wallet/HomeScreen';
-import VerifyBusiness from './components/Wallet/VerifyBusiness';
+
 import FormifyProject from './components/onBoard/FormifyProject';
 import Home from './components/Home/Home';
 
