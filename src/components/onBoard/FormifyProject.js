@@ -9,7 +9,7 @@ const mapContainerStyle = { width: "100%", height: "400px" };
 const defaultCenter = { lat: 37.7749, lng: -122.4194 }; // Default to San Francisco
 
 
-function FormifyProject({ walletAddress, onBusinessClaimed }) {
+function FormifyProject({ walletAddress, onBusinessClaimed}) {
 
     const searchBoxRef = useRef(null);
     const [step, setStep] = useState(1);

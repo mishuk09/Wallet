@@ -266,3 +266,468 @@ const showPopupForTwoSeconds = () => {
         setPopup(false); // Hide popup after 2 seconds
     }, 2000); // 2000 milliseconds = 2 seconds
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<p></p>
+
+
+import React, { useEffect, useState } from 'react';
+import underimg from './img/underimg.png';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { useAccount, useDisconnect } from 'wagmi';
+import { db } from "../Firebase/firebase";
+import { collection, query, where, getDocs } from 'firebase/firestore';
+
+const Home = () => {
+    const [businessData, setBusinessData] = useState(null); // State to store fetched business data
+    const { address, isConnected } = useAccount();
+    const { disconnect } = useDisconnect();
+
+    // Handle disconnected wallet
+    const handleDisconnect = async () => {
+        try {
+            await disconnect(); // Call the disconnect function
+            console.log("Wallet disconnected");
+            setBusinessData(null); // Reset business data
+        } catch (error) {
+            console.error("Error disconnecting wallet:", error);
+        }
+    };
+
+    // Fetch business data based on wallet address
+    const fetchBusinessData = async () => {
+        if (address) {
+            try {
+                const userDataCollection = collection(db, "stores");
+                const q = query(userDataCollection, where("wallet_address", "==", address));
+                const querySnapshot = await getDocs(q);
+
+                if (!querySnapshot.empty) {
+                    const businessInfo = querySnapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                    setBusinessData(businessInfo);
+                } else {
+                    console.log("No matching business found.");
+                }
+            } catch (error) {
+                console.error("Error fetching business data:", error);
+            }
+        }
+    };
+
+    useEffect(() => {
+        fetchBusinessData();
+    }, [address]); // Fetch data when the address changes
+
+    return (
+        <div className='w-full relative min-h-screen flex flex-col items-center bg-gray-100'>
+            {/* Wallet Connect Section */}
+            <div className='absolute p-4 top-2 right-2'>
+                <div className='flex'>
+                    <div>
+                        <ConnectButton />
+                    </div>
+                    <div>
+                        {isConnected && (
+                            <button
+                                onClick={handleDisconnect}
+                                className="bg-white rounded-xl py-2 px-4 text-base font-semibold ml-4 ms-3"
+                            >
+                                Disconnect
+                            </button>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* Main Content */}
+            <div className='flex flex-col items-center justify-center mt-36'>
+                {/* Home Title */}
+                <h1 className='text-5xl font-bold text-gray-800'>
+                    👋 Welcome to Crypto
+                    <span className='text-blue-600 inline-block'>
+                        Wallet
+                        <div className='mt-[-10px]'>
+                            <img src={underimg} alt="undereffect" className='w-[200px] h-auto' />
+                        </div>
+                    </span>
+                </h1>
+
+                {/* Description */}
+                <p className='text-gray-600 mt-4 font-semibold text-sm mb-4 px-4 text-center'>
+                    Connect your wallet to start interacting with your crypto assets.
+                </p>
+
+                {/* Start Registration Button */}
+                <a href='/register' className='mt-4 w-1/4 bg-blue-500 hover:bg-white hover:text-black hover:ring-1 hover:ring-blue-600 duration-100 transition-all text-white py-2 rounded text-lg'>
+                    Start
+                </a>
+
+                {/* Business Data Display */}
+                {businessData && (
+                    <div className='mt-12'>
+                        <h2 className='text-xl font-semibold text-gray-800 text-center mb-4'>
+                            Your Business Information
+                        </h2>
+                        {businessData.map(business => (
+                            <div key={business.id} className='bg-white p-4 rounded-lg shadow-lg mb-4'>
+                                <p className='font-bold'>{business.name}</p>
+                                <p>{business.address}</p>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                {/* Verified Businesses Map Section */}
+                <div className='w-full mt-12 mb-10'>
+                    <h2 className='text-xl font-semibold text-gray-800 text-center mb-4 '>
+                        Verified Businesses
+                    </h2>
+                    {/* Here you can implement a map or list of verified businesses */}
+                    <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+                        {/* Example of displaying verified businesses */}
+                        {/* This should be replaced with actual data fetching logic */}
+                        {businessData && businessData.map(business => (
+                            <div key={business.id} className='bg-white p-4 rounded-lg shadow-lg'>
+                                <h3 className='font-bold'>{business.name}</h3>
+                                <p>{business.address}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default Home;
+
+
+
+
+
+import React, { useEffect, useState } from 'react';
+import underimg from './img/underimg.png';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { useAccount, useDisconnect } from 'wagmi';
+import { db } from "../Firebase/firebase";
+import { collection, query, where, getDocs } from 'firebase/firestore';
+
+const Home = () => {
+    const [businessData, setBusinessData] = useState(null); // State to store fetched business data
+    const { address, isConnected } = useAccount();
+    const { disconnect } = useDisconnect();
+
+    // Handle disconnected wallet
+    const handleDisconnect = async () => {
+        try {
+            await disconnect(); // Call the disconnect function
+            console.log("Wallet disconnected");
+            setBusinessData(null); // Reset business data
+        } catch (error) {
+            console.error("Error disconnecting wallet:", error);
+        }
+    };
+
+    // Fetch business data based on wallet address
+    const fetchBusinessData = async () => {
+        if (address) {
+            try {
+                const userDataCollection = collection(db, "stores");
+                const q = query(userDataCollection, where("wallet_address", "==", address));
+                const querySnapshot = await getDocs(q);
+
+                if (!querySnapshot.empty) {
+                    const businessInfo = querySnapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                    setBusinessData(businessInfo);
+                } else {
+                    console.log("No matching business found.");
+                }
+            } catch (error) {
+                console.error("Error fetching business data:", error);
+            }
+        }
+    };
+
+    useEffect(() => {
+        fetchBusinessData();
+    }, [address]); // Fetch data when the address changes
+
+    return (
+        <div className='w-full relative min-h-screen flex flex-col items-center bg-gray-100'>
+            {/* Wallet Connect Section */}
+            <div className='absolute p-4 top-2 right-2'>
+                <div className='flex'>
+                    <div>
+                        <ConnectButton />
+                    </div>
+                    <div>
+                        {isConnected && (
+                            <button
+                                onClick={handleDisconnect}
+                                className="bg-white rounded-xl py-2 px-4 text-base font-semibold ml-4 ms-3"
+                            >
+                                Disconnect
+                            </button>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* Main Content */}
+            <div className='flex flex-col items-center justify-center mt-36'>
+                {/* Home Title */}
+                <h1 className='text-5xl font-bold text-gray-800'>
+                    👋 Welcome to Crypto
+                    <span className='text-blue-600 inline-block'>
+                        Wallet
+                        <div className='mt-[-10px]'>
+                            <img src={underimg} alt="undereffect" className='w-[200px] h-auto' />
+                        </div>
+                    </span>
+                </h1>
+
+                {/* Description */}
+                <p className='text-gray-600 mt-4 font-semibold text-sm mb-4 px-4 text-center'>
+                    Connect your wallet to start interacting with your crypto assets.
+                </p>
+
+                {/* Start Registration Button */}
+                <a href='/register' className='mt-4 w-1/4 bg-blue-500 hover:bg-white hover:text-black hover:ring-1 hover:ring-blue-600 duration-100 transition-all text-white py-2 rounded text-lg'>
+                    Start
+                </a>
+
+                {/* Business Data Display */}
+                {businessData && (
+                    <div className='mt-12'>
+                        <h2 className='text-xl font-semibold text-gray-800 text-center mb-4'>
+                            Your Business Information
+                        </h2>
+                        {businessData.map(business => (
+                            <div key={business.id} className='bg-white p-4 rounded-lg shadow-lg mb-4'>
+                                <p className='font-bold'>{business.name}</p>
+                                {business.business && (
+                                    <>
+                                        <p>Address: {business.business.address}</p>
+                                        <p>Phone: {business.business.phone}</p>
+                                    </>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                {/* Verified Businesses Map Section */}
+                <div className='w-full mt-12 mb-10'>
+                    < h2 className='text-xl font-semibold text-gray-800 text-center mb-4 '>
+                        Verified Businesses
+                    </h2>
+                    {/* Here you can implement a map or list of verified businesses */}
+                    <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+                        {/* Example of displaying verified businesses */}
+                        {businessData && businessData.map(business => (
+                            <div key={business.id} className='bg-white p-4 rounded-lg shadow-lg'>
+                                <h3 className='font-bold'>{business.name}</h3>
+                                {business.business && (
+                                    <>
+                                        <p>Address: {business.business.address}</p>
+                                        <p>Phone: {business.business.phone}</p>
+                                    </>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default Home;
+
+
+
+
+
+
+
+
+
+
+
+
+
+// =================================
+
+
+import React, { useEffect, useState } from 'react';
+import underimg from './img/underimg.png';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { useAccount, useDisconnect } from 'wagmi';
+import { db } from "../Firebase/firebase";
+import { collection, query, where, getDocs } from 'firebase/firestore';
+
+const Home = () => {
+    const [businessData, setBusinessData] = useState(null); // State to store fetched business data
+    const { address, isConnected } = useAccount();
+    const { disconnect } = useDisconnect();
+
+    // Handle disconnected wallet
+    const handleDisconnect = async () => {
+        try {
+            await disconnect(); // Call the disconnect function
+            console.log("Wallet disconnected");
+            setBusinessData(null); // Reset business data
+        } catch (error) {
+            console.error("Error disconnecting wallet:", error);
+        }
+    };
+
+    // Fetch business data based on wallet address
+    const fetchBusinessData = async () => {
+        if (address) {
+            try {
+                const userDataCollection = collection(db, "stores");
+                const q = query(userDataCollection, where("wallet_address", "==", address));
+                const querySnapshot = await getDocs(q);
+
+                if (!querySnapshot.empty) {
+                    const businessInfo = querySnapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                    setBusinessData(businessInfo);
+                } else {
+                    console.log("No matching business found.");
+                    setBusinessData([]); // Set to empty array to indicate no business found
+                }
+            } catch (error) {
+                console.error("Error fetching business data:", error);
+            }
+        }
+    };
+
+    useEffect(() => {
+        fetchBusinessData();
+    }, [address]); // Fetch data when the address changes
+
+    return (
+        <div className='w-full relative min-h-screen flex flex-col items-center bg-gray-100'>
+            {/* Wallet Connect Section */}
+            <div className='absolute p-4 top-2 right-2'>
+                <div className='flex'>
+                    <div>
+                        <ConnectButton />
+                    </div>
+                    <div>
+                        {isConnected && (
+                            <button
+                                onClick={handleDisconnect}
+                                className="bg-white rounded-xl py-2 px-4 text-base font-semibold ml-4 ms-3"
+                            >
+                                Disconnect
+                            </button>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* Main Content */}
+            <div className='flex flex-col items-center justify-center mt-36'>
+                {/* Home Title */}
+                <h1 className='text-5xl font-bold text-gray-800'>
+                    👋 Welcome to Crypto
+                    <span className='text-blue-600 inline-block'>
+                        Wallet
+                        <div className='mt-[-10px]'>
+                            <img src={underimg} alt="undereffect" className='w-[200px] h-auto' />
+                        </div>
+                    </span>
+                </h1>
+
+                {/* Description */}
+                <p className='text-gray-600 mt-4 font-semibold text-sm mb-4 px-4 text-center'>
+                    Connect your wallet to start interacting with your crypto assets.
+                </p>
+
+                {/* Start Registration Button */}
+                <a href='/register' className='mt-4 w-1/4 bg-blue-500 hover:bg-white hover:text-black hover:ring-1 hover:ring-blue-600 duration-100 transition-all text-white py-2 rounded text-lg'>
+                    Start
+                </a>
+
+                {/* Business Data Display */}
+                {businessData && businessData.length > 0 ? (
+                    <div className='mt-12'>
+                        <h2 className='text-xl font-semibold text-gray-800 text-center mb-4'>
+                            Your Business Information
+                        </h2>
+                        {businessData.map(business => (
+                            <div key={business.id} className='bg-white p-4 rounded-lg shadow-lg mb-4'>
+                                <p className='font-bold'>{business.name}</p>
+                                {business.business && (
+                                    <>
+                                        <p>Address: {business.business.address}</p>
+                                        <p>Phone: {business.business.phone}</p>
+                                    </>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className='mt-12 text-center'>
+                        <h2 className='text-xl font-semibold text-gray-800'>
+                            Business not verified. Let's verify it!
+                        </h2>
+                        <p className='text-gray-600 mt-2'>
+                            Please ensure your wallet address is linked to a verified business.
+                        </p>
+                    </div>
+                )}
+
+                {/* Verified Businesses Map Section */}
+                <div className='w-full mt-12 mb-10'>
+                    <h2 className='text-xl font-semibold text-gray-800 text-center mb-4'>
+                        Verified Businesses
+                    </h2>
+                    {/* Here you can implement a map or list of verified businesses */}
+                    <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+                        {/* Example of displaying verified businesses */}
+                        {businessData && businessData.map(business => (
+                            <div key={business.id} className='bg-white p-4 rounded-lg shadow-lg'>
+                                <h3 className='font-bold'>{business.name}</h3>
+                                {business.business && (
+                                    <>
+                                        <p>Address: {business.business.address}</p>
+                                        <p>Phone: {business.business.phone}</p>
+                                    </>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default Home;
