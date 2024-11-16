@@ -11,7 +11,8 @@ import { configureChains, createClient, WagmiConfig } from 'wagmi';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 
 //include all the chain that we need,
-const chains = [mainnet, sepolia, polygon, optimism, arbitrum, base];
+// const chains = [mainnet, sepolia, polygon, optimism, arbitrum, base];
+const chains = [base, arbitrum];
 
 //Wallet cloud projects ID if need then
 const projectId = "your-project-id-here";

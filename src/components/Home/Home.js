@@ -114,41 +114,57 @@ const Home = () => {
                     </div>
                 </div>
 
-                {businessData && businessData.length > 0 ? (
-                    <div className='mt-12'>
 
-                        <h1 className='text-xl font-semibold text-gray-800 mb-4 text-center'>
-                            ✅  Your Business Verified
-                        </h1>
-                        {
-                            businessData.map(business => (
-                                <div key={business.id} className='bg-white p-4 rounded-lg shadow-lg md-04'>
-                                    <p className='font-bold'>{business.name}    </p>
-                                    {
-                                        business.business && (
-                                            <>
-                                                <p>🏠 <span className='font-semibold'>Address:</span>{business.business.address}</p>
-                                                <p>📞 <span className='font-semibold'>Phone:</span>{business.business.phone}</p>
-                                            </>
-                                        )
-                                    }
 
-                                </div>
-                            ))
-                        }
-                    </div>
-                ) : (
-                    <div className='mt-12 text-center'>
-                        <h2 className='text-xl font-semibold text-gray-800'>
-                            ⚠️ Your Business not verified. Let's verify it!
-                        </h2>
-                        <p className='mt-2  text-gray-600'>
-                            Please ensure your wallet address is linked to a verified business.
-                        </p>
+                {/* Business Data Display */}
+                {
+                    isConnected ? (
+                        businessData && businessData.length > 0 ? (
+                            <div className='mt-12 w-full'>
 
-                    </div>
+                                <h1 className='text-xl font-semibold text-gray-800 mb-4 text-center'>
+                                    ✅  Your Business Verified
+                                </h1>
+                                {
+                                    businessData.map(business => (
+                                        <div key={business.id} className='   p-4 rounded-lg shadow-lg md-04'>
+                                            <p className='font-bold'>{business.name}    </p>
+                                            {
+                                                business.business && (
+                                                    <>
+                                                        <p>🏠 <span className='font-semibold'>Address : </span>{business.business.address}</p>
+                                                        <p>📞 <span className='font-semibold'>Phone : </span>{business.business.phone}</p>
+                                                    </>
+                                                )
+                                            }
 
-                )}
+                                        </div>
+                                    ))
+                                }
+                            </div>
+                        ) : (
+                            <div className='mt-14 text-center w-full    p-4 rounded-lg shadow-lg'>
+                                <h2 className='text-xl font-semibold text-gray-800'>
+                                    ⚠️ Your Business not verified. Let's verify it!
+                                </h2>
+                                <p className='mt-2  text-gray-600'>
+                                    Please ensure your wallet address is linked to a verified business.
+                                </p>
+
+                            </div>
+                        )
+                    ) : (
+                        <div className='mt-14 text-center w-full    p-4 rounded-lg shadow-lg md-04'>
+                            <h2 className='text-xl font-semibold text-gray-800'>
+                                🔑 Please connect your wallet to access your business information.
+                            </h2>
+                            <p className='mt-2 text-gray-600'>
+                                Once connected, you will be able to see your verified business details.
+                            </p>
+                        </div>
+                    )
+                }
+
 
 
                 {/* Verified Businesses Map Section */}
@@ -163,7 +179,7 @@ const Home = () => {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 
