@@ -50,7 +50,7 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
                 wallet_address: address || "No address", // Include wallet address
                 onboardingStep: 2, // Update onboarding step
             }, { merge: true }); // Merge to avoid overwriting existing data
-
+            handleNext(); // Move to the next step
             console.log("Owner data saved successfully to Firestore with store ID:", storeId);
         } catch (error) {
             console.error("Error saving owner data to Firestore:", error);
@@ -400,26 +400,31 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
                 {/* Step 3 */}
                 {step === 3 && (
                     <div className="text-start relative mt-14  ">
-                        <h2 className="text-2xl font-semibold mb-4">Connect a crypto wallet</h2>
-                        <p className="text-gray-500 mb-2">👋 This will be your wallet address for USDC payments</p>
+                        <h2 className="text-2xl font-semibold mb-4">This will be your wallet address for USDC payments</h2>
+                        <p className="text-gray-500 mb-2">👋 Let's connect and verify</p>
 
-                        <div className="mt-10">
-
-                            <ConnectButton />
+                        <div className="mt-10 flex">
 
 
+                            <div>
+                                <ConnectButton />
+                            </div>
 
-                            {isConnected && (
-                                <button
-                                    onClick={handleDisconnect}
-                                    className="btn-style ml-4"
-                                >
-                                    Disconnect
-                                </button>
-                            )}
+
+                            <div>
+
+                                {isConnected && (
+                                    <button
+                                        onClick={handleDisconnect}
+                                        className="btn-style ml-4  ms-10"
+                                    >
+                                        Disconnect
+                                    </button>
+                                )}
+                            </div>
                         </div>
 
-                        <div className="flex justify-between pt-4">
+                        <div className="flex justify-between mt-[200px] mb-16">
                             <button
                                 onClick={handlePrevious}
                                 type="button"
@@ -436,7 +441,7 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
                                 disabled={!isConnected}>
                                 Next
                             </button>
-                            
+
                         </div>
 
                     </div>
