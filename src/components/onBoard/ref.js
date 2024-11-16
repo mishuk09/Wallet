@@ -789,38 +789,129 @@ export default Home;
 
 
 
-{businessData && businessData.length > 0 ? (
-    <div className='mt-12'>
+{
+    businessData && businessData.length > 0 ? (
+        <div className='mt-12'>
 
-        <h1 className='text-xl font-semibold text-gray-800 mb-4 text-center'>
-            ✅  Your Business Verified
-        </h1>
-        {
-            businessData.map(business => (
-                <div key={business.id} className='bg-white p-4 rounded-lg shadow-lg md-04'>
-                    <p className='font-bold'>{business.name}    </p>
-                    {
-                        business.business && (
-                            <>
-                                <p>🏠 <span className='font-semibold'>Address:</span>{business.business.address}</p>
-                                <p>📞 <span className='font-semibold'>Phone:</span>{business.business.phone}</p>
-                            </>
-                        )
-                    }
+            <h1 className='text-xl font-semibold text-gray-800 mb-4 text-center'>
+                ✅  Your Business Verified
+            </h1>
+            {
+                businessData.map(business => (
+                    <div key={business.id} className='bg-white p-4 rounded-lg shadow-lg md-04'>
+                        <p className='font-bold'>{business.name}    </p>
+                        {
+                            business.business && (
+                                <>
+                                    <p>🏠 <span className='font-semibold'>Address:</span>{business.business.address}</p>
+                                    <p>📞 <span className='font-semibold'>Phone:</span>{business.business.phone}</p>
+                                </>
+                            )
+                        }
 
-                </div>
-            ))
+                    </div>
+                ))
+            }
+        </div>
+    ) : (
+        <div className='mt-12 text-center'>
+            <h2 className='text-xl font-semibold text-gray-800'>
+                ⚠️ Your Business not verified. Let's verify it!
+            </h2>
+            <p className='mt-2  text-gray-600'>
+                Please ensure your wallet address is linked to a verified business.
+            </p>
+
+        </div>
+
+    )
+}
+
+
+
+
+
+
+
+// Handle wallet data store
+const handleWalletAddress = async () => {
+    try {
+        const addressDataCollection = collection(db, "stores");
+        const userDocRef = doc(addressDataCollection, storeId); // Use storeId to reference the same document
+        const docSnap = await getDoc(userDocRef); // Fetch the document
+
+        if (docSnap.exists()) {
+            const businessData = docSnap.data();
+            const existingWalletAddress = businessData.wallet_address;
+
+            // Check if the current address matches the stored wallet_address
+            if (address === existingWalletAddress) {
+                alert("Your Business & Wallet already verified?");
+                return; // Exit the function if they match
+            }
         }
-    </div>
-) : (
-    <div className='mt-12 text-center'>
-        <h2 className='text-xl font-semibold text-gray-800'>
-            ⚠️ Your Business not verified. Let's verify it!
-        </h2>
-        <p className='mt-2  text-gray-600'>
-            Please ensure your wallet address is linked to a verified business.
-        </p>
 
-    </div>
+        // Proceed to store the wallet data if no match is found
+        await setDoc(userDocRef, {
+            wallet_chain: chain?.name || "Unknown", // Include wallet chain
+            wallet_address: address || "No address", // Include wallet address
+            onboardingStep: 2, // Update onboarding step
+        }, { merge: true }); // Merge to avoid overwriting existing data
 
-)}
+        handleNext(); // Move to the next step
+        console.log("Owner data saved successfully to Firestore with store ID:", storeId);
+    } catch (error) {
+        console.error("Error saving owner data to Firestore:", error);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+import { useHistory } from 'react-router-dom'; // Import useHistory
+
+// Inside your component
+const FormifyProject = ({ walletAddress, onBusinessClaimed }) => {
+    const history = useHistory(); // Initialize history
+
+    // Handle wallet data store
+    const handleWalletAddress = async () => {
+        try {
+            const addressDataCollection = collection(db, "stores");
+            const userDocRef = doc(addressDataCollection, storeId); // Use storeId to reference the same document
+            const docSnap = await getDoc(userDocRef); // Fetch the document
+
+            if (docSnap.exists()) {
+                const businessData = docSnap.data();
+                const existingWalletAddress = businessData.wallet_address;
+
+                // Check if the current address matches the stored wallet_address
+                if (address === existingWalletAddress) {
+                    alert("Your Business & Wallet already verified?");
+                    history.push('/'); // Navigate to home page after alert
+                    return; // Exit the function if they match
+                }
+            }
+
+            // Proceed to store the wallet data if no match is found
+            await setDoc(userDocRef, {
+                wallet_chain: chain?.name || "Unknown", // Include wallet chain
+                wallet_address: address || "No address", // Include wallet address
+                onboardingStep: 2, // Update onboarding step
+            }, { merge: true }); // Merge to avoid overwriting existing data
+
+            handleNext(); // Move to the next step
+            console.log("Owner data saved successfully to Firestore with store ID:", storeId);
+        } catch (error) {
+            console.error("Error saving owner data to Firestore:", error);
+        }
+    }
+
+    // ... rest of your component
+}

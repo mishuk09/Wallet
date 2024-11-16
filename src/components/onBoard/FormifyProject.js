@@ -4,13 +4,14 @@ import { db } from "../Firebase/firebase";
 import { collection, doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount, useDisconnect } from "wagmi";
-
+import { useNavigate } from 'react-router-dom';
 const mapContainerStyle = { width: "100%", height: "400px" };
 const defaultCenter = { lat: 37.7749, lng: -122.4194 }; // Default to San Francisco
 
 
-function FormifyProject({ walletAddress, onBusinessClaimed}) {
+function FormifyProject({ walletAddress, onBusinessClaimed }) {
 
+    const nevigate = useNavigate(); // Initialize history
     const searchBoxRef = useRef(null);
     const [step, setStep] = useState(1);
     const [selectedBusiness, setSelectedBusiness] = useState(null);
@@ -92,19 +93,33 @@ function FormifyProject({ walletAddress, onBusinessClaimed}) {
     };
 
 
-    //Handle wallet data store
+    // Handle wallet data store
     const handleWalletAddress = async () => {
         try {
             const addressDataCollection = collection(db, "stores");
-
-            // Use the same storeId to reference the same document
             const userDocRef = doc(addressDataCollection, storeId); // Use storeId to reference the same document
+            const docSnap = await getDoc(userDocRef); // Fetch the document
 
+            if (docSnap.exists()) {
+                const businessData = docSnap.data();
+                const existingWalletAddress = businessData.wallet_address;
+
+                // Check if the current address matches the stored wallet_address
+                if (address === existingWalletAddress) {
+
+                    alert("Your Business & Wallet already verified?");
+                    nevigate('/'); // Navigate to home page
+                    return; // Exit the function if they match
+                }
+            }
+
+            // Proceed to store the wallet data if no match is found
             await setDoc(userDocRef, {
                 wallet_chain: chain?.name || "Unknown", // Include wallet chain
                 wallet_address: address || "No address", // Include wallet address
                 onboardingStep: 2, // Update onboarding step
             }, { merge: true }); // Merge to avoid overwriting existing data
+
             handleNext(); // Move to the next step
             console.log("Owner data saved successfully to Firestore with store ID:", storeId);
         } catch (error) {
