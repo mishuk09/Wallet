@@ -1,7 +1,7 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { GoogleMap, LoadScript, Marker, StandaloneSearchBox } from "@react-google-maps/api";
 import { db } from "../Firebase/firebase";
-import { collection, doc, setDoc } from 'firebase/firestore';
+import { collection, doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount, useDisconnect } from "wagmi";
 
@@ -19,8 +19,63 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
     const [loading, setLoading] = useState(false);
     const [storeId, setStoreId] = useState(null);
     const { disconnect } = useDisconnect();
+    //Fetch business address and phone state
+    const [businessAddress, setBusinessAddress] = useState(""); // Store business data in state
+    const [businessPhone, setBusinessPhone] = useState("");
+    //code verification state
+    const [isCodeInputVisible, setIsCodeInputVisible] = useState(false);
+    // const [code, setCode] = useState("");
+    const [codeDigits, setCodeDigits] = useState(["", "", "", ""]);
+    const [isCodeCorrect, setIsCodeCorrect] = useState(false);
+
+    const [popup, setPopup] = useState(false);
 
 
+    //handle code change
+    const handleCodeChange = (index, value) => {
+        const newDigits = [...codeDigits];
+        newDigits[index] = value.slice(0, 1);
+        setCodeDigits(newDigits);
+
+        //move to the next input feild if the current one is filled
+
+        if (value && index < 3) {
+            document.getElementById(`code-input-${index + 1}`).focus();
+        }
+    }
+    //handle code submit
+    const handleCodeSubmit = async (e) => {
+        e.preventDefault();
+        const code = codeDigits.join("");
+        if (code === "1234") {
+            setIsCodeCorrect(true);
+            console.log("Code is correct");
+            setCodeDigits(["", "", "", ""]);
+            setPopup(true);
+            setTimeout(() => {
+                setPopup(false);
+            }, 2000)
+
+            // Update the stores document with isVerified: true
+            if (storeId) {
+                try {
+                    const userDataCollection = collection(db, "stores");
+                    const businessDocRef = doc(userDataCollection, storeId); // Reference the document by storeId
+
+                    await updateDoc(businessDocRef, {
+                        isVerified: true // Update the document with isVerified: true
+                    });
+
+                    console.log("Store document updated with isVerified: true");
+                } catch (error) {
+                    console.error("Error updating store document:", error);
+                }
+            }
+        } else {
+            setIsCodeCorrect(false);
+            alert("Incorrect code");
+        }
+    };
     //get necesserry function from useAccount
     const { address, isConnected, chain } = useAccount();
 
@@ -204,8 +259,52 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
     };
 
 
+
+    //fetch business data in step 4
+
+    const fetchBusinessData = async (storeId) => {
+        try {
+            const userDataCollection = collection(db, "stores");
+            const businessDocRef = doc(userDataCollection, storeId);
+            const docSnap = await getDoc(businessDocRef);
+
+            if (docSnap.exists()) {
+                const businessData = docSnap.data();
+                return {
+                    address: businessData.business.address,
+                    phone: businessData.business.phone
+                }
+            }
+        } catch (error) {
+            console.error("Error fetching business data:", error);
+            return null;
+        }
+    };
+
+    useEffect(() => {
+        const getBusinessData = async () => {
+            if (storeId) {
+                const businessData = await fetchBusinessData(storeId);
+                if (businessData) {
+                    setBusinessAddress(businessData.address);
+                    setBusinessPhone(businessData.phone);
+                }
+            }
+        };
+        getBusinessData();
+    }, [storeId]);
+
+
+
     return (
         <div className="flex   bg-gray-100">
+
+            {/* Alert for verify business */}
+            {popup && (
+                <div className="fixed top-2 right-2  " >
+                    <div class="flex w-96 shadow-lg rounded-lg">    <div class="bg-green-600 py-4 px-4 rounded-l-lg flex items-center">      <svg xmlns="http://www.w3.org/2000/svg" class="text-white fill-current" viewBox="0 0 16 16" width="20" height="20"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg>    </div>    <div class="px-4 py-4 bg-white rounded-r-lg flex justify-between items-center w-full border border-l-transparent border-gray-200">      <div>Business Verified</div>      <button>        <svg xmlns="http://www.w3.org/2000/svg" class="fill-current text-gray-700" viewBox="0 0 16 16" width="20" height="20"><path fill-rule="evenodd" d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"></path></svg>      </button>    </div>  </div>
+                </div>
+            )}
             <div className="w-1/3 lg:h-auto 2xl:h-screen bg-gradient-to-t from-[#0a091a] via-[#161330] to-[#0a091a] text-white flex flex-col text-start  pt-[200px]  px-8">
                 <h1 className="text-4xl font-semibold mb-6 leading-2">Welcome to Crypto Wallet!</h1>
                 <p className="text-gray-300   mb-6">
@@ -216,15 +315,15 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
 
             </div>
 
-            <div className="w-2/3  bg-white px-14 pt-14">
+            <div className="w-2/3 h-screen  bg-white px-14 pt-14">
                 <div className="">
                     <div className="flex items-center space-x-2">
                         {/* Only display the current step */}
                         {step === 1 && <span className="text-2xl flex items-center font-bold text-gray-800">Step 1 <span className="text-gray-600 ms-8  text-xl font-semibold">Select Business on Map</span></span>}
                         {step === 2 && <span className="text-2xl font-bold text-gray-800">Step 2 <span className="text-gray-600 ms-8  text-xl font-semibold">Fill out the form if you are business Owner</span></span>}
                         {step === 3 && <span className="text-2xl font-bold text-gray-800">Step 3 <span className="text-gray-600 ms-8  text-xl font-semibold">Connect to crypto wallet</span></span>}
-                        {step === 4 && <span className="text-2xl font-bold text-gray-800">Step 4</span>}
-                        {step === 5 && <span className="text-2xl font-bold text-gray-800">Step 5</span>}
+                        {step === 4 && <span className="text-2xl font-bold text-gray-800">Step 4 <span className="text-gray-600 ms-8  text-xl font-semibold">Verify ownership of your business</span></span>}
+                        {step === 5 && <span className="text-2xl font-bold text-gray-800">Step 5 <span className="text-gray-600 ms-8  text-xl font-semibold">Finished Your Registrations</span></span>}
                     </div>
 
                     <div className="w-full h-[10px] mt-4 flex gap-4 rounded-full overflow-hidden">
@@ -451,41 +550,109 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
                 )}
 
                 {/* Step 4 */}
-                {step === 4 && (
-                    <div>
-                        <h2 className="text-2xl font-bold mb-4">Security settings</h2>
-                        <p className="text-gray-500 mb-4">Ensure your account is secure.</p>
-                        <form className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Password</label>
-                                <input type="password" placeholder="Enter password" className="mt-1 p-2 border text-sm border-gray-300 rounded w-full" />
+                {
+
+                    step === 4 && (
+                        <div className="text-start relative mt-14">
+                            <h2 className="text-2xl font-semibold mb-4">Verify ownership of your Business</h2>
+                            <p className="text-gray-500 mb-2">✅ Let's connect and verify</p>
+
+                            <div className="mt-6">
+                                <div>
+                                    🏛️ <span className="font-semibold">Business address:</span> {businessAddress}
+                                </div>
+                                <div>
+                                    📞<span className="font-semibold"> Business phone:</span> {businessPhone}
+                                </div>
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Confirm Password</label>
-                                <input type="password" placeholder="Confirm password" className="mt-1 p-2 border text-sm border-gray-300 rounded w-full" />
+
+                            <div className="mt-10 flex mb-10 gap-4">
+                                <div className="h-10 w-1/3 text-xl tracking-widest rounded border-blue-500 border-2 flex items-center text-center justify-center">
+                                    {businessPhone}
+                                </div>
+                                <button
+                                    onClick={() => setIsCodeInputVisible(true)}
+                                    className="h-10 w-[150px] text-sm tracking-widest rounded border-blue-500 border-2 flex items-center text-center justify-center">
+                                    📞 Call Now
+                                </button>
                             </div>
-                        </form>
-                        <div className="flex justify-between">
-                            <button onClick={handlePrevious} className="bg-gray-200 text-gray-700 py-2 px-4 rounded">Previous</button>
-                            <button onClick={handleNext} className="bg-blue-500 text-white py-2 px-4 rounded">Next</button>
+
+
+
+                            {isCodeInputVisible && (
+                                <form onSubmit={handleCodeSubmit} className="mt-4">
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Enter 4-digit code:</label>
+
+                                    <div className="flex gap-4 items-center text-center  ">
+                                        <div className="flex space-x-2 mt-1">
+                                            {codeDigits.map((digit, index) => (
+                                                <input
+                                                    key={index}
+                                                    id={`code-input-${index}`}
+                                                    type="text"
+                                                    value={digit}
+                                                    onChange={(e) => handleCodeChange(index, e.target.value)}
+                                                    maxLength={1}
+                                                    className="w-10 h-10 text-center border text-sm border-gray-300 rounded focus:ring-1 focus:ring-blue-600 focus:outline-none"
+                                                    required
+                                                />
+                                            ))}
+                                        </div>
+                                        <button
+                                            type="submit"
+                                            className="  bg-green-600 text-white text-sm px-4 ms-4 w-100 h-10 rounded">
+                                            Submit Code
+                                        </button>
+                                    </div>
+                                </form>
+                            )}
+
+                            <div className="flex justify-between mt-14 mb-10">
+                                <button onClick={handlePrevious} className="btn-style w-1/4 rounded">Previous</button>
+                                <button
+                                    onClick={handleNext}
+                                    className={`btn-style w-1/4 rounded ${!isCodeCorrect ? "opacity-50 cursor-not-allowed" : ""}`}
+                                    disabled={!isCodeCorrect}>
+                                    Next
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                )}
+                    )
+                }
 
                 {/* Step 5 */}
                 {step === 5 && (
-                    <div>
-                        <h2 className="text-2xl font-bold mb-4">Final review</h2>
-                        <p className="text-gray-500 mb-4">Review your information before submitting.</p>
-                        <div className="space-y-4">
-                            <div><strong>First Name:</strong> [First Name]</div>
-                            <div><strong>Last Name:</strong> [Last Name]</div>
-                            <div><strong>Email:</strong> [Email]</div>
-                            <div><strong>Experience:</strong> [Experience]</div>
-                        </div>
-                        <div className="flex justify-between">
-                            <button onClick={handlePrevious} className="bg-gray-200 text-gray-700 py-2 px-4 rounded">Previous</button>
-                            <button onClick={handleNext} className="bg-green-500 text-white py-2 px-4 rounded">Submit</button>
+                    <div className="text-start   relative mt-14">
+                        <h2 className="text-2xl font-semibold mb-4">You are Almoas't There</h2>
+                        <p className="text-gray-500 mb-16">✅ Let's finished  </p>
+
+                        <a href="/" className="bg-green-600 mt-20 text-white text-sm py-2 px-10 rounded-full">
+
+                            Finish
+                            {/* <div className="mt-20">
+                                <div class="frame"  >
+                                    <input type="checkbox" id="button" class="hidden input-section" />
+                                    <label for="button" class="button  bg-green-600">Finish<img src="https://100dayscss.com/codepen/checkmark-green.svg" alt="alertimg" /></label>
+                                    <svg class="circle">
+                                        <circle cx="30" cy="30" r="29" />
+                                    </svg>
+                                </div>
+                            </div> */}
+                        </a>
+
+
+
+
+
+
+                        <div className="flex justify-between mt-[200px] mb-10">
+                            <button onClick={handlePrevious} className="btn-style w-1/4 rounded">Previous</button>
+                            {/* <button
+                                onClick={handleNext}
+                                className={`btn-style w-1/4 rounded ${!isCodeCorrect ? "opacity-50 cursor-not-allowed" : ""}`}
+                                disabled={!isCodeCorrect}>
+                                Next
+                            </button> */}
                         </div>
                     </div>
                 )}

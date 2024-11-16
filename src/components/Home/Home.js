@@ -1,14 +1,45 @@
-import React from 'react';
+import React, { useState } from 'react';
 import underimg from './img/underimg.png';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { useAccount, useDisconnect } from 'wagmi';
 
 const Home = () => {
+    const [isBusinessClaimed, setIsBusinessClaimed] = useState(false); // Track claim status
+    const { address, isConnected, chain } = useAccount();
+    const { disconnect } = useDisconnect();
+
+    //handle dinconnected wallet
+    const handleDisconnect = async () => {
+        try {
+            await disconnect(); // Call the disconnect function
+            console.log("Wallet disconnected");
+            setIsBusinessClaimed(false); // Reset any relevant state if needed
+        } catch (error) {
+            console.error("Error disconnecting wallet:", error);
+        }
+    };
+
     return (
         <div className='w-full relative min-h-screen flex flex-col items-center bg-gray-100'>
             {/* Wallet Connect Section */}
-            <div className='absolute p-4 top-2 right-2'>
-                <button className='bg-blue-500 hover:bg-white hover:text-black hover:ring-1 hover:ring-blue-600 duration-100 transition-all text-white  text-sm   rounded px-4 py-2  '>
-                    Wallet Connect
-                </button>
+            <div className='absolute  p-4 top-2 right-2'>
+
+                <div className='flex'>
+                    <div>
+                        <ConnectButton />
+                    </div>
+                    <div>
+
+                        {isConnected && (
+                            <button
+                                onClick={handleDisconnect}
+                                className="bg-white rounded-xl py-2 px-4  text-base font-semibold  ml-4  ms-3"
+                            >
+                                Disconnect
+                            </button>
+                        )}
+                    </div>
+                </div>
             </div>
 
             {/* Main Content */}
