@@ -3,7 +3,7 @@ import { GoogleMap, LoadScript, Marker, StandaloneSearchBox } from "@react-googl
 import { db } from "../Firebase/firebase";
 import { collection, doc, setDoc } from 'firebase/firestore';
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useAccount } from "wagmi";
+import { useAccount, useDisconnect } from "wagmi";
 
 const mapContainerStyle = { width: "100%", height: "400px" };
 const defaultCenter = { lat: 37.7749, lng: -122.4194 }; // Default to San Francisco
@@ -18,10 +18,24 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
     const [isBusinessClaimed, setIsBusinessClaimed] = useState(false); // Track claim status
     const [loading, setLoading] = useState(false);
     const [storeId, setStoreId] = useState(null);
+    const { disconnect } = useDisconnect();
 
     //step 3 state management
 
-    const { address, isConnected, chain } = useAccount;
+    const { address, isConnected, chain } = useAccount();
+
+    //handle dinconnected wallet
+
+    const handleDisconnect = async () => {
+        try {
+            await disconnect(); // Call the disconnect function
+            console.log("Wallet disconnected");
+            setIsBusinessClaimed(false); // Reset any relevant state if needed
+        } catch (error) {
+            console.error("Error disconnecting wallet:", error);
+        }
+    };
+
 
 
     //state for control empty input and next btn enabling
@@ -51,14 +65,20 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
         setStep(step - 1);
     };
 
+
+
     const handleSaveOwnerData = async (ownerData) => {
         try {
-            const usersCollection = collection(db, "users");
+            const userDataCollection = collection(db, "stores");
 
-            // Use the same storeId as the document ID for consistency across collections
-            const userDocRef = doc(usersCollection, storeId);
+            // Use the same storeId to reference the same document
+            const userDocRef = doc(userDataCollection, storeId); // Use storeId to reference the same document
 
-            await setDoc(userDocRef, ownerData, { merge: true }); // Save or merge the owner data
+            await setDoc(userDocRef, {
+                owner: ownerData, // Save owner data
+                onboardingStep: 2, // Update onboarding step
+            }, { merge: true }); // Merge to avoid overwriting existing data
+
             console.log("Owner data saved successfully to Firestore with store ID:", storeId);
         } catch (error) {
             console.error("Error saving owner data to Firestore:", error);
@@ -66,7 +86,7 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
     };
 
 
-    // Step 2 submission handler
+
     const handleSubmitStep2 = async (e) => {
         e.preventDefault();
 
@@ -133,103 +153,41 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
     };
 
     // Handle business claim and save to Firestore
-    // const handleClaimBusiness = async () => {
-    //     setLoading(true);
-    //     if (selectedBusiness) {
-    //         try {
-    //             const userDataCollection = collection(db, "stores");
-    //             const businessDocRef = doc(userDataCollection, walletAddress);
-    //             await setDoc(businessDocRef, {
-    //                 business: selectedBusiness,
-    //                 onboardingStep: 2,
-    //             });
-    //             setIsBusinessClaimed(true);
-    //             console.log("Business claimed and saved to Firestore successfully.");
 
-    //             if (onBusinessClaimed) {
-    //                 onBusinessClaimed(selectedBusiness); // Pass selected business details back to parent
-    //             }
-    //         } catch (error) {
-    //             console.error("Error storing business data in Firestore:", error);
-    //         }
-    //     }
-    // };
-
-
-    // Handle business claim and save to Firestore
-
-
-    // const handleClaimBusiness = async () => {
-    //     setLoading(true);
-    //     if (selectedBusiness) {
-    //         try {
-    //             const userDataCollection = collection(db, "stores");
-
-    //             // Generate a new document reference with an auto-generated ID
-    //             const businessDocRef = doc(userDataCollection);
-    //             const storeId = businessDocRef.id; // Firestore-generated unique ID
-
-    //             // Save the business claim data with the generated store ID
-    //             await setDoc(businessDocRef, {
-    //                 business: selectedBusiness,
-    //                 onboardingStep: 2,
-    //                 storeId, // Save the store ID as part of the store document
-    //                 wallet_chain: chain?.name,
-    //                 wallet_address: address
-    //             });
-
-    //             setIsBusinessClaimed(true);
-    //             console.log("Business claimed and saved to Firestore with store ID:", storeId);
-
-    //             if (onBusinessClaimed) {
-    //                 onBusinessClaimed({ ...selectedBusiness, storeId }); // Pass store ID to parent
-    //             }
-
-    //             // Save the storeId to state or context for later use in Step 2
-    //             setStoreId(storeId);
-    //         } catch (error) {
-    //             console.error("Error storing business data in Firestore:", error);
-    //         } finally {
-    //             setLoading(false);
-    //         }
-    //     }
-    // };
     const handleClaimBusiness = async () => {
         setLoading(true);
         if (selectedBusiness) {
             try {
                 const userDataCollection = collection(db, "stores");
-                const businessDocRef = doc(userDataCollection);
-                const storeId = businessDocRef.id;
+                const businessDocRef = doc(userDataCollection); // Create a new document reference
+                const newStoreId = businessDocRef.id; // Firestore-generated unique ID
 
-                // Check for address and chain
-                const walletAddress = address || "unknown"; // Set default if undefined
-                const walletChain = chain ? chain.name : "unknown"; // Set default if undefined
-
-                // Save the business claim data with wallet info
+                // Save the business claim data along with wallet information
                 await setDoc(businessDocRef, {
                     business: selectedBusiness,
                     onboardingStep: 2,
-                    storeId,
-                    wallet_chain: walletChain, // Use the checked variable
-                    wallet_address: walletAddress // Use the checked variable
+                    storeId: newStoreId, // Save the store ID
+                    wallet_chain: chain?.name || "Unknown", // Include wallet chain
+                    wallet_address: address || "No address", // Include wallet address
                 });
 
-                setIsBusinessClaimed(true);
-                console.log("Business claimed and saved to Firestore with store ID:", storeId);
+                console.log("Business claimed successfully with store ID:", newStoreId);
+                setStoreId(newStoreId); // Save the storeId in state for later use
+                setIsBusinessClaimed(true); // Update claim status
 
+                // Pass the storeId along with selectedBusiness to the parent component if needed
                 if (onBusinessClaimed) {
-                    onBusinessClaimed({ ...selectedBusiness, storeId }); // Pass store ID to parent
+                    onBusinessClaimed({ ...selectedBusiness, storeId: newStoreId });
                 }
-
-                setStoreId(storeId);
             } catch (error) {
                 console.error("Error storing business data in Firestore:", error);
             } finally {
-                setLoading(false);
+                setLoading(false); // Reset loading state
             }
         }
     };
+
+
 
     return (
         <div className="flex   bg-gray-100">
@@ -433,6 +391,17 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
                         <div className="mt-10">
 
                             <ConnectButton />
+
+
+
+                            {isConnected && (
+                                <button
+                                    onClick={handleDisconnect}
+                                    className="btn-style ml-4"
+                                >
+                                    Disconnect
+                                </button>
+                            )}
                         </div>
 
                         <div className="flex justify-between pt-4">
@@ -441,11 +410,33 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
                                 type="button"
                                 className="btn-style w-1/4 rounded">Previous</button>
 
+                            {/* <button 
+                                onClick={async () => {
+                                    await handleClaimBusiness();
+                                    if (isBusinessClaimed) {
+                                        handleNext();
+                                    }
+                                }} 
+                                className={`btn-style w-1/4 rounded ${!isConnected ? " opacity-50 cursor-not-allowed" : ""}`}
+                                disabled={!isConnected}>
+                                Next
+                            </button> */}
                             <button
-                                onClick={handleClaimBusiness} // Call handleClaimBusiness on button click
-                                className={`btn-style w-1/4 rounded ${!isConnected ? "opacity-50 cursor-not-allowed" : ""}`}
-                                disabled={!isConnected}
-                            >
+                                onClick={async () => {
+                                    await handleClaimBusiness(); // Ensure business is claimed first
+                                    if (isBusinessClaimed) {
+                                        // Make sure to save any additional data if needed before moving to the next step
+                                        const walletData = {
+                                            storeId: storeId, // Use the same storeId
+                                            wallet_chain: chain?.name || "Unknown",
+                                            wallet_address: address || "No address",
+                                        };
+                                        await setDoc(doc(collection(db, "stores"), storeId), walletData, { merge: true }); // Save wallet data
+                                        handleNext(); // Move to the next step
+                                    }
+                                }}
+                                className={`btn-style w-1/4 rounded ${!isConnected ? " opacity-50 cursor-not-allowed" : ""}`}
+                                disabled={!isConnected}>
                                 Next
                             </button>
                         </div>
@@ -496,7 +487,7 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
                     </div>
                 )}
             </div>
-        </div>
+        </div >
     );
 }
 
