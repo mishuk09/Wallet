@@ -1,19 +1,35 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import underimg from './img/underimg.png';
 import verify from './img/verify.png';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount, useDisconnect } from 'wagmi';
 import { db } from "../Firebase/firebase";
 import { collection, getDocs, query, where } from 'firebase/firestore';
+import { GoogleMap, LoadScript, Marker, StandaloneSearchBox } from "@react-google-maps/api";
+
+
+const mapContainerStyle = { width: "100%", height: "400px" };
+const defaultCenter = { lat: 37.7749, lng: -122.4194 }; // Default to San Francisco
+
 
 const Home = () => {
+
+    const [verifiedBusinesses, setVerifiedBusinesses] = useState([]);
+    const [mapCenter, setMapCenter] = useState(defaultCenter);
 
     const [businessData, setBusinessData] = useState(null); // State to store fetched business data
     const [verificationMessageVisible, setVerificationMessageVisible] = useState(false)
     const [isBusinessVerified, setIsBusinessVerified] = useState(false);
     const { address, isConnected } = useAccount();
     const { disconnect } = useDisconnect();
+    const [user, setUser] = useState({
+        walletAddress: null,
+        isVerified: false,
+        location: null,
+    });
 
+    const [userLocation, setUserLocation] = useState(null); // State for user's location
+    // const [user, setUser]
     // Handle disconnected wallet
     const handleDisconnect = async () => {
         try {
@@ -26,6 +42,49 @@ const Home = () => {
             console.error("Error disconnecting wallet:", error);
         }
     };
+
+    // Fetch business data based on wallet address
+    // const fetchBusinessData = async () => {
+    //     if (address) {
+    //         try {
+    //             const userDataCollection = collection(db, "stores");
+    //             const q = query(userDataCollection, where("wallet_address", "==", address));
+    //             const querySnapshot = await getDocs(q);
+
+    //             if (!querySnapshot.empty) {
+    //                 const businessInfo = querySnapshot.docs.map(doc => ({
+    //                     id: doc.id,
+    //                     ...doc.data()
+    //                 }));
+    //                 setBusinessData(businessInfo);
+
+    //                 // Set verification message visibility based on the verification status of the first business
+    //                 if (businessInfo[0].isVerified) {
+    //                     setVerificationMessageVisible(false); // Hide message if verified
+    //                     setIsBusinessVerified(true);
+    //                 } else {
+    //                     setVerificationMessageVisible(true); // Show message if not verified
+    //                     setIsBusinessVerified(false)
+    //                 }
+    //             } else {
+    //                 console.log("No matching business found.");
+    //                 setVerificationMessageVisible(false); // Hide message if no business found
+    //                 setIsBusinessVerified(false)
+    //             }
+    //         } catch (error) {
+    //             console.error("Error fetching business data:", error);
+    //         }
+    //     }
+    // };
+
+    // useEffect(() => {
+    //     fetchBusinessData();
+    // }, [address]); // Fetch data when the address changes
+
+
+
+    // User state declaration
+
 
     // Fetch business data based on wallet address
     const fetchBusinessData = async () => {
@@ -42,18 +101,20 @@ const Home = () => {
                     }));
                     setBusinessData(businessInfo);
 
-                    // Set verification message visibility based on the verification status of the first business
+                    // Check if the business is verified
                     if (businessInfo[0].isVerified) {
-                        setVerificationMessageVisible(false); // Hide message if verified
-                        setIsBusinessVerified(true);
+                        setUser({
+                            walletAddress: address,
+                            isVerified: true,
+                            location: { lat: businessInfo[0].business.lat, lng: businessInfo[0].business.lng },
+                        });
+                        setMapCenter({ lat: businessInfo[0].business.lat, lng: businessInfo[0].business.lng });
                     } else {
-                        setVerificationMessageVisible(true); // Show message if not verified
-                        setIsBusinessVerified(false)
+                        setUser({ ...user, isVerified: false, location: null }); // Reset user location if not verified
                     }
                 } else {
                     console.log("No matching business found.");
-                    setVerificationMessageVisible(false); // Hide message if no business found
-                    setIsBusinessVerified(false)
+                    setUser({ ...user, isVerified: false, location: null }); // Reset user location if no business found
                 }
             } catch (error) {
                 console.error("Error fetching business data:", error);
@@ -61,9 +122,50 @@ const Home = () => {
         }
     };
 
+    // Fetch verified businesses from Firestore
+    const fetchVerifiedBusinesses = async () => {
+        try {
+            const userDataCollection = collection(db, "stores");
+            const q = query(userDataCollection, where("isVerified", "==", true));
+            const querySnapshot = await getDocs(q);
+            const businesses = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setVerifiedBusinesses(businesses);
+        } catch (error) {
+            console.error("Error fetching verified businesses:", error);
+        }
+    };
+
+    // Get user's current location
+    const getUserLocation = () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                const location = { lat: position.coords.latitude, lng: position.coords.longitude };
+                setUserLocation(location);
+                setMapCenter(location);
+            }, (error) => {
+                console.error("Error getting user location:", error);
+            });
+        } else {
+            console.error("Geolocation is not supported by this browser.");
+        }
+    };
+
+    // Fetch business data
     useEffect(() => {
         fetchBusinessData();
-    }, [address]); // Fetch data when the address changes
+    }, [address]);
+
+    // Fetch verified businesses on component mount
+    useEffect(() => {
+        fetchVerifiedBusinesses();
+    }, []);
+
+    // Get user's location when connected
+    useEffect(() => {
+        if (isConnected) {
+            getUserLocation();
+        }
+    }, [isConnected]);
 
 
     return (
@@ -212,7 +314,24 @@ const Home = () => {
                     {/* Map Container */}
                     <div className='w-full h-[400px] bg-white rounded-lg shadow-lg'>
                         {/* Replace this with an actual map, e.g., Google Maps */}
-                        <p className='text-center text-gray-600 py-16'>Map will be displayed here.</p>
+                        <LoadScript
+                            googleMapsApiKey="AIzaSyDOEDZEEqWAyWNyKpBNrhF9Cxti0AfRVDU"
+                            libraries={["places"]}
+                        >
+                            <GoogleMap
+                                mapContainerStyle={mapContainerStyle}
+                                zoom={12}
+                                center={mapCenter}
+                            >
+                                {verifiedBusinesses.map(business => (
+                                    <Marker
+                                        key={business.id}
+                                        position={{ lat: business.business.lat, lng: business.business.lng }} // Ensure lat/lng are in your business data
+                                        title={business.business.name} // Optional: show business name on hover
+                                    />
+                                ))}
+                            </GoogleMap>
+                        </LoadScript>
                     </div>
                 </div>
             </div>

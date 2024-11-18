@@ -1700,3 +1700,212 @@ useEffect(() => {
 //         console.error("Error saving owner data to Firestore:", error);
 //     }
 // };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import React, { useState, useEffect, useRef } from "react";
+import { GoogleMap, LoadScript, Marker, StandaloneSearchBox } from "@react-google-maps/api";
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from "../Firebase/firebase";
+
+const mapContainerStyle = { width: "100%", height: "400px" };
+const defaultCenter = { lat: 37.7749, lng: -122.4194 }; // Default to San Francisco
+
+function FormifyProject() {
+    const [verifiedBusinesses, setVerifiedBusinesses] = useState([]);
+    const [mapCenter, setMapCenter] = useState(defaultCenter);
+    const searchBoxRef = useRef(null);
+
+    // Fetch verified businesses from Firestore
+    useEffect(() => {
+        const fetchVerifiedBusinesses = async () => {
+            try {
+                const userDataCollection = collection(db, "stores");
+                const q = query(userDataCollection, where("isVerified", "==", true)); // Query for verified businesses
+                const querySnapshot = await getDocs(q);
+                const businesses = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                setVerifiedBusinesses(businesses);
+            } catch (error) {
+                console.error("Error fetching verified businesses:", error);
+            }
+        };
+
+        fetchVerifiedBusinesses();
+    }, []);
+
+    return (
+        <div>
+            <h2 className="text-2xl font-semibold mb-4">Verified Businesses on Map</h2>
+            <LoadScript
+                googleMapsApiKey="YOUR_GOOGLE_MAPS_API_KEY"
+                libraries={["places"]}
+            >
+                <GoogleMap
+                    mapContainerStyle={mapContainerStyle}
+                    zoom={12}
+                    center={mapCenter}
+                >
+                    {verifiedBusinesses.map(business => (
+                        <Marker
+                            key={business.id}
+                            position={{ lat: business.business.lat, lng: business.business.lng }} // Ensure lat/lng are in your business data
+                            title={business.business.name} // Optional: show business name on hover
+                        />
+                    ))}
+                </GoogleMap>
+            </LoadScript>
+        </div>
+    );
+}
+
+export default FormifyProject;
+
+
+
+
+
+
+
+
+
+
+
+
+
+import React, { useEffect, useRef, useState } from 'react';
+import underimg from './img/underimg.png';
+import verify from './img/verify.png';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { useAccount, useDisconnect } from 'wagmi';
+import { db } from "../Firebase/firebase";
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
+
+const mapContainerStyle = { width: "100%", height: "400px" };
+const defaultCenter = { lat: 37.7749, lng: -122.4194 }; // Default to San Francisco
+
+const Home = () => {
+    const [verifiedBusinesses, setVerifiedBusinesses] = useState([]);
+    const [mapCenter, setMapCenter] = useState(defaultCenter);
+    const [userLocation, setUserLocation] = useState(null); // State for user's location
+    const [businessData, setBusinessData] = useState(null);
+    const [isBusinessVerified, setIsBusinessVerified] = useState(false);
+    const { address, isConnected } = useAccount();
+    const { disconnect } = useDisconnect();
+
+    const handleDisconnect = async () => {
+        // ... (existing disconnect logic)
+    };
+
+    const fetchBusinessData = async () => {
+        if (address) {
+            try {
+                const userDataCollection = collection(db, "stores");
+                const q = query(userDataCollection, where("wallet_address", "==", address));
+                const querySnapshot = await getDocs(q);
+
+                if (!querySnapshot.empty) {
+                    const businessInfo = querySnapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                    setBusinessData(businessInfo);
+
+                    // Check if the business is verified
+                    if (businessInfo[0].isVerified) {
+                        setIsBusinessVerified(true);
+                        setUser Location({ lat: businessInfo[0].business.lat, lng: businessInfo[0].business.lng }); // Set user's location from business data
+                        setMapCenter({ lat: businessInfo[0].business.lat, lng: businessInfo[0].business.lng }); // Center the map on user's location
+                    } else {
+                        setIsBusinessVerified(false);
+                        setUser Location(null); // Reset user location if not verified
+                    }
+                } else {
+                    console.log("No matching business found.");
+                    setIsBusinessVerified(false);
+                    setUser Location(null); // Reset user location if no business found
+                }
+            } catch (error) {
+                console.error("Error fetching business data:", error);
+            }
+        }
+    };
+
+    useEffect(() => {
+        fetchBusinessData();
+    }, [address]);
+
+    // Fetch verified businesses from Firestore
+    useEffect(() => {
+        const fetchVerifiedBusinesses = async () => {
+            try {
+                const userDataCollection = collection(db, "stores");
+                const q = query(userDataCollection, where("isVerified", "==", true));
+                const querySnapshot = await getDocs(q);
+                const businesses = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                setVerifiedBusinesses(businesses);
+            } catch (error) {
+                console.error("Error fetching verified businesses:", error);
+            }
+        };
+
+        fetchVerifiedBusinesses();
+    }, []);
+
+    // Get user's current location
+    const getUser Location = () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                setUser Location({ lat: position.coords.latitude, lng: position.coords.longitude });
+                setMapCenter({ lat: position.coords.latitude, lng: position.coords.longitude });
+            }, (error) => {
+                console.error("Error getting user location:", error);
+            });
+        } else {
+            console.error("Geolocation is not supported by this browser.");
+        }
+    };
+
+    // Call getUser Location when the user is connected
+    useEffect(() => {
+        if (isConnected) {
+            getUser Location();
+        }
+    }, [isConnected]);
+
+    return (
+        <div className='w-full relative min-h-screen flex ```javascript
+        flex-col items-center justify-center'>
+            <ConnectButton />
+            <div className='map-container'>
+                <LoadScript googleMapsApiKey="YOUR_API_KEY">
+                    <GoogleMap
+                        mapContainerStyle={mapContainerStyle}
+                        center={mapCenter}
+                        zoom={10}
+                    >
+                        {userLocation && (
+                            <Marker position={userLocation} />
+                        )}
+                        {!isBusinessVerified && verifiedBusinesses.map(business => (
+                            <Marker key={business.id} position={{ lat: business.business.lat, lng: business.business.lng }} />
+                        ))}
+                    </GoogleMap>
+                </LoadScript>
+            </div>
+        </div>
+    );
+};
+
+export default Home;
