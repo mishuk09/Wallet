@@ -14,7 +14,7 @@ const Home = () => {
 
     const [verifiedBusinesses, setVerifiedBusinesses] = useState([]);
     const [mapCenter, setMapCenter] = useState(defaultCenter);
-
+    const [loading, setLoading] = useState(false); // Loading state
     const [businessData, setBusinessData] = useState(null); // State to store fetched business data
     const [verificationMessageVisible, setVerificationMessageVisible] = useState(false)
     const [isBusinessVerified, setIsBusinessVerified] = useState(false);
@@ -45,6 +45,7 @@ const Home = () => {
     // Fetch business data based on wallet address
     const fetchBusinessData = async () => {
         if (address) {
+            setLoading(true); // Start loading
             try {
                 const userDataCollection = collection(db, "stores");
                 const q = query(userDataCollection, where("wallet_address", "==", address));
@@ -76,13 +77,16 @@ const Home = () => {
                     console.log("No matching business found.");
                     setUser({ ...user, isVerified: false, location: null }); // Reset user location if no business found
                     setVerificationMessageVisible(false); // Hide message if no business found
-                    setIsBusinessVerified(false)
+                    setIsBusinessVerified(false);
                 }
             } catch (error) {
                 console.error("Error fetching business data:", error);
+            } finally {
+                setLoading(false); // Stop loading
             }
         }
     };
+
 
     // Fetch verified businesses from Firestore
     const fetchVerifiedBusinesses = async () => {
@@ -177,7 +181,7 @@ const Home = () => {
                     <div className="w-[150px] md:w-[200px]">
                         <a
                             href="/register"
-                            className="w-full px-14 md:px-20 bg-blue-500 hover:bg-white hover:text-black hover:ring-1 hover:ring-blue-600 duration-100 transition-all text-white py-2 rounded text-base md:text-lg"
+                            className="w-full px-14 md:px-20 bg-blue-500 hover:bg-white hover:text-black hover:ring-1 hover:ring-blue-600 duration-[0.3s]   transition-all ease-in-out text-white py-2 rounded text-base md:text-lg"
                         >
                             Start
                         </a>
@@ -186,7 +190,7 @@ const Home = () => {
                         {isConnected && (
                             <button
                                 onClick={handleDisconnect}
-                                className=" w-[150px] md:w-[200px] bg-red-500 hover:bg-white hover:text-black hover:ring-1 hover:ring-blue-600 duration-100 transition-all text-white py-[8px] md:py-[7px] rounded text-base md:text-lg"
+                                className=" w-[150px] md:w-[200px] bg-red-500 hover:bg-white hover:text-black hover:ring-1 hover:ring-blue-600 duration-[0.3s] transition-all ease-in-out text-white py-[8px] md:py-[7px] rounded text-base md:text-lg"
                             >
                                 Disconnect
                             </button>
@@ -197,62 +201,71 @@ const Home = () => {
 
 
                 {/* Business Data Display */}
+ 
                 {
                     isConnected ? (
-                        businessData && businessData.length > 0 ? (
-                            <div className='mt-12 w-full'>
-                                <h1 className='text-xl flex items-center justify-center font-semibold text-gray-800 mb-4 text-center'>
-                                    <div>
-                                        Business Status
-                                    </div>
-                                    <div className='flex items-center justify-center ms-2'>
-                                        {isBusinessVerified && (
-
-                                            <img src={verify} className='w-5 h-5' alt="" srcset="" />
-                                        )}
-
-                                        {
-                                            verificationMessageVisible && (
-                                                <p>🔓</p>
-                                            )
-                                        }
-
-                                    </div>
-                                </h1>
-                                {
-                                    businessData.map(business => (
-                                        <div key={business.id} className='p-4 rounded-lg shadow-lg md-04'>
-                                            <p className='font-bold'>{business.name}</p>
-                                            {
-                                                business.business && (
-                                                    <>
-                                                        <p>🏠 <span className='font-semibold'>Address : </span>{business.business.address}</p>
-                                                        <p>📞 <span className='font-semibold'>Phone : </span>{business.business.phone}</p>
-                                                        {
-                                                            // Check if the business is not verified
-                                                            !business.isVerified && (
-                                                                <p className='text-red-500 text-sm mt-2'>
-                                                                    ⚠️ Your business has been added but not verified. Let's verify it!
-                                                                </p>
-                                                            )
-                                                        }
-                                                    </>
-                                                )
-                                            }
-                                        </div>
-                                    ))
-                                }
+                        loading ? (
+                            <div className="flex items-center mt-20 justify-center h-100">
+                                <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                                <span className="ml-4 text-lg font-medium text-gray-700">Loading data...</span>
                             </div>
                         ) : (
-                            <div className='mt-14 text-center w-full p-4 rounded-lg shadow-lg'>
-                                <h2 className='text-xl font-semibold text-gray-800'>
-                                    ⚠️ Your Business not found. Let's Register!
-                                </h2>
-                                <p className='mt-2 text-gray-600'>
-                                    Please ensure your wallet address is linked to a verified business.
-                                </p>
-                            </div>
-                        )
+
+
+                            businessData && businessData.length > 0 ? (
+                                < div className='mt-12 w-full'>
+                                    <h1 className='text-xl flex items-center justify-center font-semibold text-gray-800 mb-4 text-center'>
+                                        <div>
+                                            Business Status
+                                        </div>
+                                        <div className='flex items-center justify-center ms-2'>
+                                            {isBusinessVerified && (
+
+                                                <img src={verify} className='w-5 h-5' alt="" srcset="" />
+                                            )}
+
+                                            {
+                                                verificationMessageVisible && (
+                                                    <p>🔓</p>
+                                                )
+                                            }
+
+                                        </div>
+                                    </h1>
+                                    {
+                                        businessData.map(business => (
+                                            <div key={business.id} className='p-4 rounded-lg shadow-lg md-04'>
+                                                <p className='font-bold'>{business.name}</p>
+                                                {
+                                                    business.business && (
+                                                        <>
+                                                            <p>🏠 <span className='font-semibold'>Address : </span>{business.business.address}</p>
+                                                            <p>📞 <span className='font-semibold'>Phone : </span>{business.business.phone}</p>
+                                                            {
+                                                                // Check if the business is not verified
+                                                                !business.isVerified && (
+                                                                    <p className='text-red-500 text-sm mt-2'>
+                                                                        ⚠️ Your business has been added but not verified. Let's verify it!
+                                                                    </p>
+                                                                )
+                                                            }
+                                                        </>
+                                                    )
+                                                }
+                                            </div>
+                                        ))
+                                    }
+                                </div>
+                            ) : (
+                                <div className='mt-14 text-center w-full p-4 rounded-lg shadow-lg'>
+                                    <h2 className='text-xl font-semibold text-gray-800'>
+                                        ⚠️ Your Business not found. Let's Register!
+                                    </h2>
+                                    <p className='mt-2 text-gray-600'>
+                                        Please ensure your wallet address is linked to a verified business.
+                                    </p>
+                                </div>
+                            ))
                     ) : (
                         <div className='mt-14 text-center w-full p-4 rounded-lg shadow-lg md-04'>
                             <h2 className='text-xl font-semibold text-gray-800'>
