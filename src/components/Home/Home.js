@@ -5,7 +5,7 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount, useDisconnect } from 'wagmi';
 import { db } from "../Firebase/firebase";
 import { collection, getDocs, query, where } from 'firebase/firestore';
-import { GoogleMap, LoadScript, Marker, StandaloneSearchBox } from "@react-google-maps/api";
+import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 
 
 const mapContainerStyle = { width: "100%", height: "400px" };
@@ -27,7 +27,7 @@ const Home = () => {
     });
 
     const [userLocation, setUserLocation] = useState(null); // State for user's location
-    // const [user, setUser]
+
     // Handle disconnected wallet
     const handleDisconnect = async () => {
         try {
@@ -40,48 +40,6 @@ const Home = () => {
             console.error("Error disconnecting wallet:", error);
         }
     };
-
-    // Fetch business data based on wallet address
-    // const fetchBusinessData = async () => {
-    //     if (address) {
-    //         try {
-    //             const userDataCollection = collection(db, "stores");
-    //             const q = query(userDataCollection, where("wallet_address", "==", address));
-    //             const querySnapshot = await getDocs(q);
-
-    //             if (!querySnapshot.empty) {
-    //                 const businessInfo = querySnapshot.docs.map(doc => ({
-    //                     id: doc.id,
-    //                     ...doc.data()
-    //                 }));
-    //                 setBusinessData(businessInfo);
-
-    //                 // Set verification message visibility based on the verification status of the first business
-    //                 if (businessInfo[0].isVerified) {
-    //                     setVerificationMessageVisible(false); // Hide message if verified
-    //                     setIsBusinessVerified(true);
-    //                 } else {
-    //                     setVerificationMessageVisible(true); // Show message if not verified
-    //                     setIsBusinessVerified(false)
-    //                 }
-    //             } else {
-    //                 console.log("No matching business found.");
-    //                 setVerificationMessageVisible(false); // Hide message if no business found
-    //                 setIsBusinessVerified(false)
-    //             }
-    //         } catch (error) {
-    //             console.error("Error fetching business data:", error);
-    //         }
-    //     }
-    // };
-
-    // useEffect(() => {
-    //     fetchBusinessData();
-    // }, [address]); // Fetch data when the address changes
-
-
-
-    // User state declaration
 
 
     // Fetch business data based on wallet address
@@ -106,13 +64,19 @@ const Home = () => {
                             isVerified: true,
                             location: { lat: businessInfo[0].business.lat, lng: businessInfo[0].business.lng },
                         });
+                        setIsBusinessVerified(true);
+                        setVerificationMessageVisible(false); // Hide message if verified
                         setMapCenter({ lat: businessInfo[0].business.lat, lng: businessInfo[0].business.lng });
                     } else {
                         setUser({ ...user, isVerified: false, location: null }); // Reset user location if not verified
+                        setIsBusinessVerified(false);
+                        setVerificationMessageVisible(true); // Show message if not verified
                     }
                 } else {
                     console.log("No matching business found.");
                     setUser({ ...user, isVerified: false, location: null }); // Reset user location if no business found
+                    setVerificationMessageVisible(false); // Hide message if no business found
+                    setIsBusinessVerified(false)
                 }
             } catch (error) {
                 console.error("Error fetching business data:", error);
@@ -300,9 +264,6 @@ const Home = () => {
                         </div>
                     )
                 }
-
-
-
 
                 {/* Verified Businesses Map Section */}
                 <div className='w-full mt-12 mb-10'>

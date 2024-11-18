@@ -212,65 +212,6 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
 
 
     // Handle business claim from map and save to Firestore
-    // const handleClaimBusiness = async () => {
-    //     setLoading(true);
-    //     if (selectedBusiness) {
-    //         try {
-    //             const userDataCollection = collection(db, "stores");
-
-    //             // Query to check if the wallet_address already exists in the database
-    //             const querySnapshot = await getDocs(query(userDataCollection, where("wallet_address", "==", address)));
-
-    //             // If any document matches, it means the wallet_address is already in use
-    //             if (!querySnapshot.empty) {
-    //                 const existingBusinessData = querySnapshot.docs[0].data(); // Get the first matching document
-    //                 const isVerified = existingBusinessData.isVerified; // Check the isVerified status
-
-    //                 if (isVerified) {
-    //                     alert("This wallet address is already associated with a verified business.");
-    //                     setLoading(false); // Reset loading state
-    //                     return; // Exit the function if the wallet address is already verified
-    //                 } else {
-    //                     alert("This wallet address is associated with a business but not verified. Please proceed to verification.");
-    //                     setIsBusinessClaimed(true); // Set claim status to true to enable the next button
-    //                     setStep(4); // Redirect to step 4 for verification
-    //                     setLoading(false); // Reset loading state
-    //                     return; // Exit the function to allow verification
-    //                 }
-    //             }
-
-    //             // If the wallet_address is not found, proceed to create a new document
-    //             const businessDocRef = doc(userDataCollection); // Create a new document reference
-    //             const newStoreId = businessDocRef.id; // Firestore-generated unique ID
-
-    //             // Save the business claim data along with wallet information
-    //             await setDoc(businessDocRef, {
-    //                 business: selectedBusiness,
-    //                 onboardingStep: 2,
-    //                 isVerified: false,
-    //                 storeId: newStoreId, // Save the store ID
-    //                 // wallet_chain: chain?.name || "Unknown", // Include wallet chain
-    //                 // wallet_address: address || "No address", // Include wallet address
-    //             });
-
-    //             console.log("Business claimed successfully with store ID:", newStoreId);
-    //             setStoreId(newStoreId); // Save the storeId in state for later use
-    //             setIsBusinessClaimed(true); // Update claim status
-
-    //             // Pass the storeId along with selectedBusiness to the parent component if needed
-    //             if (onBusinessClaimed) {
-    //                 onBusinessClaimed({ ...selectedBusiness, storeId: newStoreId });
-    //             }
-    //             handleNext(); // Move to the next step after creating a new business
-    //         } catch (error) {
-    //             console.error("Error storing business data in Firestore:", error);
-    //         } finally {
-    //             setLoading(false); // Reset loading state
-    //         }
-    //     }
-    // };
-
-
     const handleClaimBusiness = async () => {
         setLoading(true);
         if (selectedBusiness) {
@@ -451,7 +392,7 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
     }, [storeId, address]); // Dependency array includes storeId and address
 
     return (
-        <div className="flex   bg-gray-100">
+        <div className="flex   md:bg-gray-100">
 
             {/* Alert for verify business */}
             {popup && (
@@ -459,7 +400,7 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
                     <div class="flex w-96 shadow-lg rounded-lg">    <div class="bg-green-600 py-4 px-4 rounded-l-lg flex items-center">      <svg xmlns="http://www.w3.org/2000/svg" class="text-white fill-current" viewBox="0 0 16 16" width="20" height="20"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg>    </div>    <div class="px-4 py-4 bg-white rounded-r-lg flex justify-between items-center w-full border border-l-transparent border-gray-200">      <div>Business Verified</div>      <button>        <svg xmlns="http://www.w3.org/2000/svg" class="fill-current text-gray-700" viewBox="0 0 16 16" width="20" height="20"><path fill-rule="evenodd" d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"></path></svg>      </button>    </div>  </div>
                 </div>
             )}
-            <div className="w-1/3 fixed top-0 left-0 bg-gradient-to-t from-[#0a091a] via-[#161330] to-[#0a091a] text-white flex flex-col text-start pt-[200px] px-8 h-full">
+            <div className="w-1/3 hidden md:fixed top-0 left-0 bg-gradient-to-t from-[#0a091a] via-[#161330] to-[#0a091a] text-white md:flex flex-col text-start pt-[200px] px-8 h-full">
                 <h1 className="text-4xl font-semibold mb-6 leading-2">Welcome to Crypto Wallet!</h1>
                 <p className="text-gray-300 mb-6">
                     Connect your wallet to start interacting with your crypto assets.
@@ -468,16 +409,16 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
                 <p className="text-gray-300 font-semibold mb-10">Sign up now for secure and seamless crypto transactions.</p>
             </div>
 
-            <div className="w-2/3 ml-[33.33%] h-screen bg-white px-14 pt-14 overflow-y-auto">
+            <div className=" w-full md:w-2/3 md:ml-[33.33%] h-screen bg-white px-4 md:px-14 mt-6 md:mt-0 md:pt-14 overflow-y-auto">
                 {/* Remaining content goes here */}
                 <div className="">
                     <div className="flex items-center space-x-2">
                         {/* Only display the current step */}
-                        {step === 1 && <span className="text-2xl flex items-center font-bold text-gray-800">Step 1 <span className="text-gray-600 ms-8  text-xl font-semibold">Select Business on Map</span></span>}
-                        {step === 2 && <span className="text-2xl font-bold text-gray-800">Step 2 <span className="text-gray-600 ms-8  text-xl font-semibold">Fill out the form if you are business Owner</span></span>}
-                        {step === 3 && <span className="text-2xl font-bold text-gray-800">Step 3 <span className="text-gray-600 ms-8  text-xl font-semibold">Connect to crypto wallet</span></span>}
-                        {step === 4 && <span className="text-2xl font-bold text-gray-800">Step 4 <span className="text-gray-600 ms-8  text-xl font-semibold">Verify ownership of your business</span></span>}
-                        {step === 5 && <span className="text-2xl font-bold text-gray-800">Step 5 <span className="text-gray-600 ms-8  text-xl font-semibold">Finished Your Registrations</span></span>}
+                        {step === 1 && <span className="text-2xl flex items-center font-bold text-gray-800">Step 1 <span className="text-gray-600 ms-4 md:ms-8 text-xl font-semibold">Select Business on Map</span></span>}
+                        {step === 2 && <span className="text-2xl font-bold text-gray-800">Step 2 <span className="text-gray-600  ms-4 md:ms-8  text-xl font-semibold">Fill out the form</span></span>}
+                        {step === 3 && <span className="text-2xl font-bold text-gray-800">Step 3 <span className="text-gray-600 ms-4 md:ms-8  text-xl font-semibold">Connect to crypto wallet</span></span>}
+                        {step === 4 && <span className="text-2xl font-bold text-gray-800">Step 4 <span className="text-gray-600 ms-4 md:ms-8  text-xl font-semibold">Verify business</span></span>}
+                        {step === 5 && <span className="text-2xl font-bold text-gray-800">Step 5 <span className="text-gray-600 ms-4 md:ms-8  text-xl font-semibold">Finished  Registrations</span></span>}
                     </div>
 
                     <div className="w-full h-[10px] mt-4 flex gap-4 rounded-full overflow-hidden">
@@ -492,8 +433,8 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
 
                 {/* Step 1 */}
                 {step === 1 && (
-                    <div className="text-start relative mt-12   mb-8">
-                        <h2 className="text-2xl font-semibold mb-4">Select Business on Map</h2>
+                    <div className="text-start relative mt-8 md:mt-12   mb-8">
+                        <h2 className="text-xl md:text-2xl font-semibold mb-4">Select Business on Map</h2>
                         <p className="text-gray-500 ">👋 Let's start your dream journey</p>
 
                         <LoadScript
@@ -531,8 +472,8 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
                             {selectedBusiness ? (
                                 <div className="mt-6 mb-10">
                                     <div className="flex flex-col gap-4 ">
-                                        <div className="flex gap-10">
-                                            <h3 className="text-lg"> <span className="font-semibold">📌 Selected Business:</span> {selectedBusiness.name}  </h3>
+                                        <div className="md:flex gap-10">
+                                            <h3 className="text-lg mb-3 md:mb-0"> <span className="font-semibold">📌 Selected Business:</span> {selectedBusiness.name}  </h3>
                                             <p> <span className="font-semibold">📞 Contact:</span> {selectedBusiness.phone}  </p>
                                         </div>
                                         {/* <div className="flex gap-10">
@@ -546,7 +487,16 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
                                     </div>
 
                                     <button
-                                        className={`w-1/4  btn-style  mt-6 ${loading ? 'opacity-50 cursor-not-allowed' : ''
+                                        className={`w-1/4 lg:hidden btn-style  mt-6 ${loading ? 'opacity-50 cursor-not-allowed' : ''
+                                            }`}
+                                        onClick={handleClaimBusiness}
+                                        disabled={loading} // Disable button while saving
+                                    >
+                                        {loading ? 'Saving...' : '✨ Claim'}
+                                    </button>
+
+                                    <button
+                                        className={`w-1/4 hidden lg:flex btn-style  mt-6 ${loading ? 'opacity-50 cursor-not-allowed' : ''
                                             }`}
                                         onClick={handleClaimBusiness}
                                         disabled={loading} // Disable button while saving
@@ -576,8 +526,8 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
 
                 {/* Step 2 */}
                 {step === 2 && (
-                    <div className="text-start relative mt-12  ">
-                        <h2 className="text-2xl font-semibold mb-4">Fill out the form if you are business owner and want to accept USDC in your business</h2>
+                    <div className="text-start relative mt-8 md:mt-12  ">
+                        <h2 className="  text-xl md:text-2xl font-semibold mb-4">Fill out the form if you are business owner and want to accept USDC in your business</h2>
                         <p className="text-gray-500 mb-2">👋 Let's start your dream journey</p>
 
                         <form className="space-y-4 mb-6 mt-6" onSubmit={handleSubmitStep2}>
@@ -652,8 +602,8 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
 
                 {/* Step 3 */}
                 {step === 3 && (
-                    <div className="text-start relative mt-12  ">
-                        <h2 className="text-2xl font-semibold mb-4">This will be your wallet address for USDC payments</h2>
+                    <div className="text-start relative mt-8 md:mt-12  ">
+                        <h2 className="text-xl md:text-2xl font-semibold mb-4">This will be your wallet address for USDC payments</h2>
                         <p className="text-gray-500 mb-2">👋 Let's connect and verify</p>
 
                         <div className="mt-10 flex">
@@ -704,15 +654,13 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
                 )}
 
                 {/* Step 4 */}
-                {
-
-                    step === 4 && (
-                        <div className="text-start relative mt-12">
-                            <h2 className="text-2xl font-semibold mb-4">Verify ownership of your Business</h2>
+                { step === 4 && (
+                        <div className="text-start relative mt-8 md:mt-12">
+                            <h2 className="text-xl md:text-2xl font-semibold mb-4">Verify ownership of your Business</h2>
                             <p className="text-gray-500 mb-2">✅ Let's connect and verify</p>
 
                             <div className="mt-6">
-                                <div>
+                                <div className="mb-2 md:mb-0">
                                     🏛️ <span className="font-semibold">Business address:</span> {businessAddress}
                                 </div>
                                 <div>
@@ -720,13 +668,13 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
                                 </div>
                             </div>
 
-                            <div className="mt-10 flex mb-10 gap-4">
-                                <div className="h-10 w-1/3 text-xl tracking-widest rounded border-blue-500 border-2 flex items-center text-center justify-center">
+                            <div className="mt-10 md:flex mb-10 gap-4">
+                                <div className="h-10 w-full lg:w-1/3 text-xl tracking-widest rounded border-blue-500 border-2 flex items-center text-center justify-center">
                                     {businessPhone}
                                 </div>
                                 <button
                                     onClick={() => setIsCodeInputVisible(true)}
-                                    className="h-10 w-[150px] text-sm tracking-widest rounded border-blue-500 border-2 flex items-center text-center justify-center">
+                                    className="h-10 mt-3 md:mt-0 mx-auto md:mx-0 w-[150px] text-sm tracking-widest rounded border-blue-500 border-2 flex items-center text-center justify-center">
                                     📞 Call Now
                                 </button>
                             </div>
@@ -776,28 +724,15 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
 
                 {/* Step 5 */}
                 {step === 5 && (
-                    <div className="text-start   relative mt-12">
-                        <h2 className="text-2xl font-semibold mb-4">You are Almoas't There</h2>
+                    <div className="text-start   relative mt-8 md:mt-12">
+                        <h2 className="text-xl md:text-2xl font-semibold mb-4">You are Almoas't There</h2>
                         <p className="text-gray-500 mb-16">✅ Let's finished  </p>
 
-                        <a href="/" className="bg-green-600 mt-20 text-white text-sm py-2 px-10 rounded-full">
+                        <a href="/" className="bg-green-600 mt-20 text-white text-sm mx-auto py-3 px-14 rounded-full">
 
                             Finish
-                            {/* <div className="mt-20">
-                                <div class="frame"  >
-                                    <input type="checkbox" id="button" class="hidden input-section" />
-                                    <label for="button" class="button  bg-green-600">Finish<img src="https://100dayscss.com/codepen/checkmark-green.svg" alt="alertimg" /></label>
-                                    <svg class="circle">
-                                        <circle cx="30" cy="30" r="29" />
-                                    </svg>
-                                </div>
-                            </div> */}
+                           
                         </a>
-
-
-
-
-
 
                         <div className="flex justify-between mt-[200px] mb-10">
                             <button onClick={handlePrevious} className="btn-style w-1/4 rounded">Previous</button>

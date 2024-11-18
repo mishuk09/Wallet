@@ -9,7 +9,7 @@ function App() {
   // Define the handleBusinessClaimed function to handle business claiming logic
   const handleBusinessClaimed = (claimedBusiness) => {
     console.log("Business claimed:", claimedBusiness);
-    // Add any further logic here if needed
+    
   };
 
   return (
