@@ -10,8 +10,6 @@ import { GoogleMap, LoadScript, Marker, StandaloneSearchBox } from "@react-googl
 
 const mapContainerStyle = { width: "100%", height: "400px" };
 const defaultCenter = { lat: 37.7749, lng: -122.4194 }; // Default to San Francisco
-
-
 const Home = () => {
 
     const [verifiedBusinesses, setVerifiedBusinesses] = useState([]);
@@ -169,7 +167,7 @@ const Home = () => {
 
 
     return (
-        <div className='w-full relative min-h-screen flex flex-col items-center bg-gray-100'>
+        <div className='w-full px-3 md:p-0 relative min-h-screen flex flex-col items-center bg-gray-100'>
             {/* Wallet Connect Section */}
             <div className='absolute  p-4 top-2 right-2'>
 
@@ -194,13 +192,13 @@ const Home = () => {
             {/* Main Content */}
             <div className='flex flex-col items-center justify-center mt-36'>
                 {/* Home Title */}
-                <h1 className='text-5xl font-bold text-gray-800'>
+                <h1 className=' text-3xl md:text-5xl font-bold text-gray-800'>
                     👋 Welcome to Crypto
                     <span className='text-blue-600 inline-block'>
                         Wallet
                         {/* Image Below Wallet Text */}
                         <div className='mt-[-10px]'>
-                            <img src={underimg} alt="undereffect" className='w-[200px] h-auto' />
+                            <img src={underimg} alt="undereffect" className='w-[150px] md:w-[200px] h-auto' />
                         </div>
                     </span>
                 </h1>
@@ -212,10 +210,10 @@ const Home = () => {
 
                 {/* Start Registration Button */}
                 <div className="flex justify-center mt-4 items-center space-x-4">
-                    <div className="w-[200px]">
+                    <div className="w-[150px] md:w-[200px]">
                         <a
                             href="/register"
-                            className="w-full px-20 bg-blue-500 hover:bg-white hover:text-black hover:ring-1 hover:ring-blue-600 duration-100 transition-all text-white py-2 rounded text-lg"
+                            className="w-full px-14 md:px-20 bg-blue-500 hover:bg-white hover:text-black hover:ring-1 hover:ring-blue-600 duration-100 transition-all text-white py-2 rounded text-base md:text-lg"
                         >
                             Start
                         </a>
@@ -224,7 +222,7 @@ const Home = () => {
                         {isConnected && (
                             <button
                                 onClick={handleDisconnect}
-                                className="w-[200px] bg-red-500 hover:bg-white hover:text-black hover:ring-1 hover:ring-blue-600 duration-100 transition-all text-white py-[7px] rounded text-lg"
+                                className=" w-[150px] md:w-[200px] bg-red-500 hover:bg-white hover:text-black hover:ring-1 hover:ring-blue-600 duration-100 transition-all text-white py-[8px] md:py-[7px] rounded text-base md:text-lg"
                             >
                                 Disconnect
                             </button>
