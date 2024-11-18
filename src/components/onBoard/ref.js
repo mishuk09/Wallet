@@ -915,3 +915,160 @@ const FormifyProject = ({ walletAddress, onBusinessClaimed }) => {
 
     // ... rest of your component
 }
+
+
+
+
+
+
+
+const handleClaimBusiness = async () => {
+    setLoading(true);
+    if (selectedBusiness) {
+        try {
+            const userDataCollection = collection(db, "stores");
+
+            // Query to check if the wallet_address already exists in the database
+            const querySnapshot = await getDocs(query(userDataCollection, where("wallet_address", "==", address)));
+
+            // If any document matches, it means the wallet_address is already in use
+            if (!querySnapshot.empty) {
+                alert("This wallet address is already associated with a business.");
+                setLoading(false); // Reset loading state
+                return; // Exit the function if the wallet address already exists
+            }
+
+            // If the wallet_address is not found, proceed to create a new document
+            const businessDocRef = doc(userDataCollection); // Create a new document reference
+            const newStoreId = businessDocRef.id; // Firestore-generated unique ID
+
+            // Save the business claim data along with wallet information
+            await setDoc(businessDocRef, {
+                business: selectedBusiness,
+                onboardingStep: 2,
+                isVerified: false,
+                storeId: newStoreId, // Save the store ID
+                // wallet_chain: chain?.name || "Unknown", // Include wallet chain
+                // wallet_address: address || "No address", // Include wallet address
+            });
+
+            console.log("Business claimed successfully with store ID:", newStoreId);
+            setStoreId(newStoreId); // Save the storeId in state for later use
+            setIsBusinessClaimed(true); // Update claim status
+
+            // Pass the storeId along with selectedBusiness to the parent component if needed
+            if (onBusinessClaimed) {
+                onBusinessClaimed({ ...selectedBusiness, storeId: newStoreId });
+            }
+        } catch (error) {
+            console.error("Error storing business data in Firestore:", error);
+        } finally {
+            setLoading(false); // Reset loading state
+        }
+    }
+};
+
+
+
+
+
+// Handle wallet data store
+const handleWalletAddress = async () => {
+    try {
+        const addressDataCollection = collection(db, "stores");
+        const userDocRef = doc(addressDataCollection, storeId); // Use storeId to reference the same document
+        const docSnap = await getDoc(userDocRef); // Fetch the document
+
+        if (docSnap.exists()) {
+            const businessData = docSnap.data();
+            const existingWalletAddress = businessData.wallet_address;
+            const isVerified = businessData.isVerified; // Check the isVerified status
+
+            // Check if the current address matches the stored wallet_address
+            if (address === existingWalletAddress) {
+                if (isVerified) {
+                    alert("Your Business & Wallet are already verified.");
+                    nevigate('/'); // Navigate to home page
+                } else {
+                    alert("Your wallet is associated with this business but not verified. Please proceed to verification.");
+                    handleNext(); // Allow to proceed to step 4 for verification
+                }
+                return; // Exit the function after handling the case
+            }
+        }
+
+        // Proceed to store the wallet data if no match is found
+        await setDoc(userDocRef, {
+            wallet_chain: chain?.name || "Unknown", // Include wallet chain
+            wallet_address: address || "No address", // Include wallet address
+            onboardingStep: 2, // Update onboarding step
+        }, { merge: true }); // Merge to avoid overwriting existing data
+
+        handleNext(); // Move to the next step
+        console.log("Owner data saved successfully to Firestore with store ID:", storeId);
+    } catch (error) {
+        console.error("Error saving owner data to Firestore:", error);
+    }
+}
+
+
+
+
+
+
+
+const handleClaimBusiness = async () => {
+    setLoading(true);
+    if (selectedBusiness) {
+        try {
+            const userDataCollection = collection(db, "stores");
+
+            // Query to check if the wallet_address already exists in the database
+            const querySnapshot = await getDocs(query(userDataCollection, where("wallet_address", "==", address)));
+
+            // If any document matches, it means the wallet_address is already in use
+            if (!querySnapshot.empty) {
+                const existingBusinessData = querySnapshot.docs[0].data(); // Get the first matching document
+                const isVerified = existingBusinessData.isVerified; // Check the isVerified status
+
+                if (isVerified) {
+                    alert("This wallet address is already associated with a verified business.");
+                    setLoading(false); // Reset loading state
+                    return; // Exit the function if the wallet address is already verified
+                } else {
+                    alert("This wallet address is associated with a business but not verified. Please proceed to verification.");
+                    setIsBusinessClaimed(true); // Set claim status to true to enable the next button
+                    setLoading(false); // Reset loading state
+                    return; // Exit the function to allow verification
+                }
+            }
+
+            // If the wallet_address is not found, proceed to create a new document
+            const businessDocRef = doc(userDataCollection); // Create a new document reference
+            const newStoreId = businessDocRef.id; // Firestore-generated unique ID
+
+            // Save the business claim data along with wallet information
+            await setDoc(businessDocRef, {
+                business: selectedBusiness,
+                onboardingStep: 2,
+                isVerified: false,
+                storeId: newStoreId, // Save the store ID
+                // wallet_chain: chain?.name || "Unknown", // Include wallet chain
+                // wallet_address: address || "No address", // Include wallet address
+            });
+
+            console.log("Business claimed successfully with store ID:", newStoreId);
+            setStoreId(newStoreId); // Save the storeId in state for later use
+            setIsBusinessClaimed(true); // Update claim status
+
+            // Pass the storeId along with selectedBusiness to the parent component if needed
+            if (onBusinessClaimed) {
+                onBusinessClaimed({ ...selectedBusiness, storeId: newStoreId });
+            }
+        } catch (error) {
+            console.error("Error storing business data in Firestore:", error);
+        } finally {
+            setLoading(false); // Reset loading state
+        }
+    }
+};
