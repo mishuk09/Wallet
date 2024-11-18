@@ -654,72 +654,72 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
                 )}
 
                 {/* Step 4 */}
-                { step === 4 && (
-                        <div className="text-start relative mt-8 md:mt-12">
-                            <h2 className="text-xl md:text-2xl font-semibold mb-4">Verify ownership of your Business</h2>
-                            <p className="text-gray-500 mb-2">✅ Let's connect and verify</p>
+                {step === 4 && (
+                    <div className="text-start relative mt-8 md:mt-12">
+                        <h2 className="text-xl md:text-2xl font-semibold mb-4">Verify ownership of your Business</h2>
+                        <p className="text-gray-500 mb-2">✅ Let's connect and verify</p>
 
-                            <div className="mt-6">
-                                <div className="mb-2 md:mb-0">
-                                    🏛️ <span className="font-semibold">Business address:</span> {businessAddress}
-                                </div>
-                                <div>
-                                    📞<span className="font-semibold"> Business phone:</span> {businessPhone}
-                                </div>
+                        <div className="mt-6">
+                            <div className="mb-2 md:mb-0">
+                                🏛️ <span className="font-semibold">Business address:</span> {businessAddress}
                             </div>
-
-                            <div className="mt-10 md:flex mb-10 gap-4">
-                                <div className="h-10 w-full lg:w-1/3 text-xl tracking-widest rounded border-blue-500 border-2 flex items-center text-center justify-center">
-                                    {businessPhone}
-                                </div>
-                                <button
-                                    onClick={() => setIsCodeInputVisible(true)}
-                                    className="h-10 mt-3 md:mt-0 mx-auto md:mx-0 w-[150px] text-sm tracking-widest rounded border-blue-500 border-2 flex items-center text-center justify-center">
-                                    📞 Call Now
-                                </button>
-                            </div>
-
-
-
-                            {isCodeInputVisible && (
-                                <form onSubmit={handleCodeSubmit} className="mt-4">
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Enter 4-digit code:</label>
-
-                                    <div className="flex gap-4 items-center text-center  ">
-                                        <div className="flex space-x-2 mt-1">
-                                            {codeDigits.map((digit, index) => (
-                                                <input
-                                                    key={index}
-                                                    id={`code-input-${index}`}
-                                                    type="text"
-                                                    value={digit}
-                                                    onChange={(e) => handleCodeChange(index, e.target.value)}
-                                                    maxLength={1}
-                                                    className="w-10 h-10 text-center border text-sm border-gray-300 rounded focus:ring-1 focus:ring-blue-600 focus:outline-none"
-                                                    required
-                                                />
-                                            ))}
-                                        </div>
-                                        <button
-                                            type="submit"
-                                            className="  bg-green-600 text-white text-sm px-4 ms-4 w-100 h-10 rounded">
-                                            Submit Code
-                                        </button>
-                                    </div>
-                                </form>
-                            )}
-
-                            <div className="flex justify-between mt-14 mb-10">
-                                <button onClick={handlePrevious} className="btn-style w-1/4 rounded">Previous</button>
-                                <button
-                                    onClick={handleNext}
-                                    className={`btn-style w-1/4 rounded ${!isCodeCorrect ? "opacity-50 cursor-not-allowed" : ""}`}
-                                    disabled={!isCodeCorrect}>
-                                    Next
-                                </button>
+                            <div>
+                                📞<span className="font-semibold"> Business phone:</span> {businessPhone}
                             </div>
                         </div>
-                    )
+
+                        <div className="mt-10 md:flex mb-10 gap-4">
+                            <div className="h-10 w-full lg:w-1/3 text-xl tracking-widest rounded border-blue-500 border-2 flex items-center text-center justify-center">
+                                {businessPhone}
+                            </div>
+                            <button
+                                onClick={() => setIsCodeInputVisible(true)}
+                                className="h-10 mt-3 md:mt-0 mx-auto md:mx-0 w-[150px] text-sm tracking-widest rounded border-blue-500 border-2 flex items-center text-center justify-center">
+                                📞 Call Now
+                            </button>
+                        </div>
+
+
+
+                        {isCodeInputVisible && (
+                            <form onSubmit={handleCodeSubmit} className="mt-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Enter 4-digit code:</label>
+
+                                <div className="flex gap-4 items-center text-center  ">
+                                    <div className="flex space-x-2 mt-1">
+                                        {codeDigits.map((digit, index) => (
+                                            <input
+                                                key={index}
+                                                id={`code-input-${index}`}
+                                                type="text"
+                                                value={digit}
+                                                onChange={(e) => handleCodeChange(index, e.target.value)}
+                                                maxLength={1}
+                                                className="w-10 h-10 text-center border text-sm border-gray-300 rounded focus:ring-1 focus:ring-blue-600 focus:outline-none"
+                                                required
+                                            />
+                                        ))}
+                                    </div>
+                                    <button
+                                        type="submit"
+                                        className="  bg-green-600 text-white text-sm px-4 ms-4 w-100 h-10 rounded">
+                                        Submit Code
+                                    </button>
+                                </div>
+                            </form>
+                        )}
+
+                        <div className="flex justify-between mt-14 mb-10">
+                            <button onClick={handlePrevious} className="btn-style w-1/4 rounded">Previous</button>
+                            <button
+                                onClick={handleNext}
+                                className={`btn-style w-1/4 rounded ${!isCodeCorrect ? "opacity-50 cursor-not-allowed" : ""}`}
+                                disabled={!isCodeCorrect}>
+                                Next
+                            </button>
+                        </div>
+                    </div>
+                )
                 }
 
                 {/* Step 5 */}
@@ -728,11 +728,28 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
                         <h2 className="text-xl md:text-2xl font-semibold mb-4">You are Almoas't There</h2>
                         <p className="text-gray-500 mb-16">✅ Let's finished  </p>
 
-                        <a href="/" className="bg-green-600 mt-20 text-white text-sm mx-auto py-3 px-14 rounded-full">
+                        {/* <a href="/" className="bg-green-600 mt-20 text-white text-sm mx-auto py-3 px-14 rounded-full">
 
                             Finish
                            
-                        </a>
+                        </a> */}
+                        <div className="flex flex-col items-center mt-10 px-4 sm:px-0">
+                            {/* Display Message */}
+                            <div className="bg-green-100 border border-green-500 text-green-700 px-4 py-3 rounded-lg mb-5 text-center shadow-md">
+                                <p className="text-lg font-medium">
+                                    ✅ Your business has been verified. Thank you! 🎉
+                                </p>
+                            </div>
+
+                            {/* Finish Button */}
+                            <a
+                                href="/"
+                                className="bg-green-600 mt-4 text-white text-sm py-3 px-14 rounded-full shadow-lg hover:bg-green-700 transition duration-200 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2"
+                            >
+                                🏁 Finish
+                            </a>
+                        </div>
+
 
                         <div className="flex justify-between mt-[200px] mb-10">
                             <button onClick={handlePrevious} className="btn-style w-1/4 rounded">Previous</button>
