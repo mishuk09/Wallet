@@ -1015,6 +1015,491 @@ const handleWalletAddress = async () => {
 
 
 
+useEffect(() => {
+    const getBusinessData = async () => {
+        if (storeId) {
+            // Fetch business data using storeId for new users
+            const businessData = await fetchBusinessData(storeId);
+            if (businessData) {
+                setBusinessAddress(businessData.address);
+                setBusinessPhone(businessData.phone);
+            }
+        } else if (address) {
+            // If storeId is not available, fetch using wallet_address for existing users
+            const userDataCollection = collection(db, "stores");
+            const querySnapshot = await getDocs(query(userDataCollection, where("wallet_address", "==", address)));
+            if (!querySnapshot.empty) {
+                const existingBusinessData = querySnapshot.docs[0].data(); // Get the first matching document
+                setBusinessAddress(existingBusinessData.business.address);
+                setBusinessPhone(existingBusinessData.business.phone);
+            }
+        }
+    };
+    getBusinessData();
+}, [storeId, address]); // Dependency array includes storeId and address
+
+
+
+
+
+
+
+
+////
+
+
+
+
+
+
+
+
+{/* Business Data Display */ }
+{
+    isConnected ? (
+        businessData && businessData.length > 0 ? (
+            <div className='mt-12 w-full'>
+                <h1 className='text-xl font-semibold text-gray-800 mb-4 text-center'>
+                    ✅ Your Business Status
+                </h1>
+                {
+                    businessData.map(business => (
+                        <div key={business.id} className='p-4 rounded-lg shadow-lg md-04'>
+                            <p className='font-bold'>{business.name}</p>
+                            {
+                                business.business && (
+                                    <>
+                                        <p>🏠 <span className='font-semibold'>Address : </span>{business.business.address}</p>
+                                        <p>📞 <span className='font-semibold'>Phone : </span>{business.business.phone}</p>
+                                        {
+                                            // Check if the business is not verified
+                                            !business.isVerified && (
+                                                <p className='text-red-500 mt-2'>
+                                                    ⚠️ Your business has been added but not verified. Let's verify it!
+                                                </p>
+                                            )
+                                        }
+                                    </>
+                                )
+                            }
+                        </div>
+                    ))
+                }
+            </div>
+        ) : (
+            <div className='mt-14 text-center w-full p-4 rounded-lg shadow-lg'>
+                <h2 className='text-xl font-semibold text-gray-800'>
+                    ⚠️ Your Business not found. Let's add it!
+                </h2>
+                <p className='mt-2 text-gray-600'>
+                    Please ensure your wallet address is linked to a verified business.
+                </p>
+            </div>
+        )
+    ) : (
+        <div className='mt-14 text-center w-full p-4 rounded-lg shadow-lg md-04'>
+            <h2 className='text-xl font-semibold text-gray-800'>
+                🔑 Please connect your wallet to access your business information.
+            </h2>
+            <p className='mt-2 text-gray-600'>
+                Once connected, you will be able to see your verified business details.
+            </p>
+        </div>
+    )
+}
+
+
+
+
+
+
+
+
+
+
+
+import React, { useEffect, useState } from 'react';
+import underimg from './img/underimg.png';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { useAccount, useDisconnect } from 'wagmi';
+import { db } from "../Firebase/firebase";
+import { collection, getDocs, query, where } from 'firebase/firestore';
+
+const Home = () => {
+    const [businessData, setBusinessData] = useState(null); // State to store fetched business data
+    const [verificationMessageVisible, setVerificationMessageVisible] = useState(false); // State for verification message visibility
+    const { address, isConnected } = useAccount();
+    const { disconnect } = useDisconnect();
+
+    // Handle disconnected wallet
+    const handleDisconnect = async () => {
+        try {
+            await disconnect(); // Call the disconnect function
+            console.log("Wallet disconnected");
+            setBusinessData(null); // Reset business data
+            setVerificationMessageVisible(false); // Reset verification message visibility
+        } catch (error) {
+            console.error("Error disconnecting wallet:", error);
+        }
+    };
+
+    // Fetch business data based on wallet address
+    const fetchBusinessData = async () => {
+        if (address) {
+            try {
+                const userDataCollection = collection(db, "stores");
+                const q = query(userDataCollection, where("wallet_address", "==", address));
+                const querySnapshot = await getDocs(q);
+
+                if (!querySnapshot.empty) {
+                    const businessInfo = querySnapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                    setBusinessData(businessInfo);
+
+                    // Set verification message visibility based on the verification status of the first business
+                    if (businessInfo[0].isVerified) {
+                        setVerificationMessageVisible(false); // Hide message if verified
+                    } else {
+                        setVerificationMessageVisible(true); // Show message if not verified
+                    }
+                } else {
+                    console.log("No matching business found.");
+                    setVerificationMessageVisible(false); // Hide message if no business found
+                }
+            } catch (error) {
+                console.error("Error fetching business data:", error);
+            }
+        }
+    };
+
+    useEffect(() => {
+        fetchBusinessData();
+    }, [address]); // Fetch data when the address changes
+
+    return (
+        <div className='w-full relative min-h-screen flex flex-col items-center bg-gray-100'>
+            {/* Wallet Connect Section */}
+            <div className='absolute p-4 top-2 right-2'>
+                <div className='flex'>
+                    <div>
+                        <ConnectButton />
+                    </div>
+                    <div>
+                        {isConnected && (
+                            <button
+                                onClick={handleDisconnect}
+                                className="bg-white rounded-xl py-2 px-4 text-base font-semibold ml-4 ms-3"
+                            >
+                                Disconnect
+                            </button>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* Main Content */}
+            <div className='flex flex-col items-center justify-center mt-36'>
+                {/* Home Title */}
+                <h1 className='text-5xl font-bold text-gray-800'>
+                    👋 Welcome to Crypto
+                    <span className='text-blue-600 inline-block'>
+                        Wallet
+                        <div className='mt-[-10px]'>
+                            <img src={underimg} alt="undereffect" className='w-[200px] h-auto' />
+                        </div>
+                    </span>
+                </h1>
+
+                {/* Description */}
+                <p className='text-gray-600 mt-4 font-semibold text-sm mb-4 px-4 text-center'>
+                    Connect your wallet to start interacting with your crypto assets.
+                </p>
+
+                {/* Verification Message */}
+                {verificationMessageVisible && (
+                    <p className='text-red-500 mt-4 font-semibold text-sm mb-4 px-4 text-center'>
+                        ⚠️ Your business has been added but not verified. Let's verify it!
+                    </p>
+                )}
+
+                {/* Start Registration Button */}
+                <div className="flex justify-center mt-4 items-center space-x-4">
+                    <div className="w-[200px]">
+                        <a
+                            href="/register"
+                            className="w full px-20 bg-blue-500 hover:bg-white hover:text-black hover:ring-1 hover:ring-blue-500 text-white font-semibold py-2 rounded-lg transition duration-300"
+                        >
+                            Start Registration
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            {/* Business Data Display */}
+            {
+                isConnected ? (
+                    businessData && businessData.length > 0 ? (
+                        <div className='mt-12 w-full'>
+                            <h1 className='text-xl font-semibold text-gray-800 mb-4 text-center'>
+                                ✅ Your Business Status
+                            </h1>
+                            {
+                                businessData.map(business => (
+                                    <div key={business.id} className='p-4 rounded-lg shadow-lg md-04'>
+                                        <p className='font-bold'>{business.name}</p>
+                                        {
+                                            business.business && (
+                                                <>
+                                                    <p>🏠 <span className='font-semibold'>Address : </span>{business.business.address}</p>
+                                                    <p>📞 <span className='font-semibold'>Phone : </span>{business.business.phone}</p>
+                                                    {
+                                                        // Check if the business is not verified
+                                                        !business.isVerified && (
+                                                            <p className='text-red-500 mt-2'>
+                                                                ⚠️ Your business has been added but not verified. Let's verify it!
+                                                            </p>
+                                                        )
+                                                    }
+                                                </>
+                                            )
+                                        }
+                                    </div>
+                                ))
+                            }
+                        </div>
+                    ) : (
+                        <div className='mt-14 text-center w-full p-4 rounded-lg shadow-lg'>
+                            <h2 className='text-xl font-semibold text-gray-800'>
+                                ⚠️ Your Business not found. Let's add it!
+                            </h2>
+                            <p className='mt-2 text-gray-600'>
+                                Please ensure your wallet address is linked to a verified business.
+                            </p>
+                        </div>
+                    )
+                ) : (
+                    <div className='mt-14 text-center w-full p-4 rounded-lg shadow-lg md-04'>
+                        <h2 className='text-xl font-semibold text-gray-800'>
+                            🔑 Please connect your wallet to access your business information.
+                        </h2>
+                        <p className='mt-2 text-gray-600'>
+                            Once connected, you will be able to see your verified business details.
+                        </p>
+                    </div>
+                )
+            }
+        </div>
+    );
+};
+
+export default Home;
+
+
+
+
+
+
+
+
+
+
+
+import React, { useEffect, useState } from 'react';
+import underimg from './img/underimg.png';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { useAccount, useDisconnect } from 'wagmi';
+import { db } from "../Firebase/firebase";
+import { collection, getDocs, query, where } from 'firebase/firestore';
+
+const Home = () => {
+    const [businessData, setBusinessData] = useState(null); // State to store fetched business data
+    const [verificationMessageVisible, setVerificationMessageVisible] = useState(false); // State for verification message visibility
+    const [isBusinessVerified, setIsBusinessVerified] = useState(false); // State for business verification status
+    const { address, isConnected } = useAccount();
+    const { disconnect } = useDisconnect();
+
+    // Handle disconnected wallet
+    const handleDisconnect = async () => {
+        try {
+            await disconnect(); // Call the disconnect function
+            console.log("Wallet disconnected");
+            setBusinessData(null); // Reset business data
+            setVerificationMessageVisible(false); // Reset verification message visibility
+            setIsBusinessVerified(false); // Reset business verification status
+        } catch (error) {
+            console.error("Error disconnecting wallet:", error);
+        }
+    };
+
+    // Fetch business data based on wallet address
+    const fetchBusinessData = async () => {
+        if (address) {
+            try {
+                const userDataCollection = collection(db, "stores");
+                const q = query(userDataCollection, where("wallet_address", "==", address));
+                const querySnapshot = await getDocs(q);
+
+                if (!querySnapshot.empty) {
+                    const businessInfo = querySnapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                    setBusinessData(businessInfo);
+
+                    // Set verification message visibility and business verification status
+                    if (businessInfo[0].isVerified) {
+                        setVerificationMessageVisible(false); // Hide message if verified
+                        setIsBusinessVerified(true); // Set verified status to true
+                    } else {
+                        setVerificationMessageVisible(true); // Show message if not verified
+                        setIsBusinessVerified(false); // Set verified status to false
+                    }
+                } else {
+                    console.log("No matching business found.");
+                    setVerificationMessageVisible(false); // Hide message if no business found
+                    setIsBusinessVerified(false); // Reset verified status
+                }
+            } catch (error) {
+                console.error("Error fetching business data:", error);
+            }
+        }
+    };
+
+    useEffect(() => {
+        fetchBusinessData();
+    }, [address]); // Fetch data when the address changes
+
+    return (
+        <div className='w-full relative min-h-screen flex flex-col items-center bg-gray-100'>
+            {/* Wallet Connect Section */}
+            <div className='absolute p-4 top-2 right-2'>
+                <div className='flex'>
+                    <div>
+                        <ConnectButton />
+                    </div>
+                    <div>
+                        {isConnected && (
+                            <button
+                                onClick={handleDisconnect}
+                                className="bg-white rounded-xl py-2 px-4 text-base font-semibold ml-4 ms-3"
+                            >
+                                Disconnect
+                            </button>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* Main Content */}
+            <div className='flex flex-col items-center justify-center mt-36'>
+                {/* Home Title */}
+                <h1 className='text-5xl font-bold text-gray-800'>
+                    👋 Welcome to Crypto
+                    <span className='text-blue-600 inline-block'>
+                        Wallet
+                        <div className='mt-[-10px]'>
+                            <img src={underimg} alt="undereffect" className='w-[200px] h-auto' />
+                        </div>
+                    </span>
+                </h1>
+
+                {/* Description */}
+                <p className='text-gray-600 mt-4 font-semibold text-sm mb-4 px-4 text-center'>
+                    Connect your wallet to start interacting with your crypto assets.
+                </p>
+
+                {/* Verification Message */}
+                {verificationMessageVisible && (
+                    <p className='text-red-500 mt-4 font-semibold text-sm mb-4 px-4 text-center'>
+                        ⚠️ Your business has been added but not verified. Let's verify it!
+                    </p>
+                )}
+
+                {/* Verified Emoji */}
+                {isBusinessVerified && (
+                    <p className='text-green-500 mt-4 font-semibold text-sm mb-4 px-4 text-center'>
+                        ✅ Your business is verified!
+                    </p>
+                )}
+
+                {/* Start Registration Button */}
+                <div className="flex justify-center mt-4 items-center space-x-4">
+                    <div className="w-[200px]">
+                        <a
+                            href="/register"
+                            className="w full px-20 bg-blue-500 hover:bg-white hover:text-black hover:ring-1 hover:ring-blue-500 text-white font-semibold py-2 rounded-lg transition duration-300"
+                        >
+                            Start Registration
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            {/* Business Data Display */}
+            {
+                isConnected ? (
+                    businessData && businessData.length > 0 ? (
+                        <div className='mt-12 w-full'>
+                            <h1 className='text-xl font-semibold text-gray-800 mb-4 text-center'>
+                                ✅ Your Business Status
+                            </h1>
+                            {
+                                businessData.map(business => (
+                                    <div key={business.id} className='p-4 rounded-lg shadow-lg md-04'>
+                                        <p className='font-bold'>{business.name}</p>
+                                        {
+                                            business.business && (
+                                                <>
+                                                    <p>🏠 <span className='font-semibold'>Address : </span>{business.business.address}</p>
+                                                    <p>📞 <span className='font-semibold'>Phone : </span>{business.business.phone}</p>
+                                                    {
+                                                        // Check if the business is not verified
+                                                        !business.isVerified && (
+                                                            <p className='text-red-500 mt-2'>
+                                                                ⚠️ Your business has been added but not verified. Let's verify it!
+                                                            </p>
+                                                        )
+                                                    }
+                                                </>
+                                            )
+                                        }
+                                    </div>
+                                ))
+                            }
+                        </div>
+                    ) : (
+                        <div className='mt-14 text-center w-full p-4 rounded-lg shadow-lg'>
+                            <h2 className='text-xl font-semibold text-gray-800'>
+                                ⚠️ Your Business not found. Let's add it!
+                            </h2>
+                            <p className='mt-2 text-gray-600'>
+                                Please ensure your wallet address is linked to a verified business.
+                            </p>
+                        </div>
+                    )
+                ) : (
+                    <div className='mt-14 text-center w-full p-4 rounded-lg shadow-lg md-04'>
+                        <h2 className='text-xl font-semibold text-gray-800'>
+                            🔑 Please connect your wallet to access your business information.
+                        </h2>
+                        <p className='mt-2 text-gray-600'>
+                            Once connected, you will be able to see your verified business details.
+                        </p>
+                    </div>
+                )
+            }
+        </div>
+    );
+};
+
+export default Home;
+
+
+
+
+
 
 
 const handleClaimBusiness = async () => {
@@ -1022,6 +1507,35 @@ const handleClaimBusiness = async () => {
     if (selectedBusiness) {
         try {
             const userDataCollection = collection(db, "stores");
+
+            // Check if the wallet address is empty
+            if (!address) {
+                // If the wallet_address is empty, proceed to create a new document
+                const businessDocRef = doc(userDataCollection); // Create a new document reference
+                const newStoreId = businessDocRef.id; // Firestore-generated unique ID
+
+                // Save the business claim data along with wallet information
+                await setDoc(businessDocRef, {
+                    business: selectedBusiness,
+                    onboardingStep: 2,
+                    isVerified: false,
+                    storeId: newStoreId, // Save the store ID
+                    // wallet_chain: chain?.name || "Unknown", // Include wallet chain
+                    // wallet_address: address || "No address", // Include wallet address
+                });
+
+                console.log("Business claimed successfully with store ID:", newStoreId);
+                setStoreId(newStoreId); // Save the storeId in state for later use
+                setIsBusinessClaimed(true); // Update claim status
+
+                // Pass the storeId along with selectedBusiness to the parent component if needed
+                if (onBusinessClaimed) {
+                    onBusinessClaimed({ ...selectedBusiness, storeId: newStoreId });
+                }
+                handleNext(); // Move to the next step after creating a new business
+                setLoading(false); // Reset loading state
+                return; // Exit the function
+            }
 
             // Query to check if the wallet_address already exists in the database
             const querySnapshot = await getDocs(query(userDataCollection, where("wallet_address", "==", address)));
@@ -1031,13 +1545,18 @@ const handleClaimBusiness = async () => {
                 const existingBusinessData = querySnapshot.docs[0].data(); // Get the first matching document
                 const isVerified = existingBusinessData.isVerified; // Check the isVerified status
 
+                // Set the storeId from the existing data
+                setStoreId(querySnapshot.docs[0].id); // Set the storeId to the ID of the existing document
+
                 if (isVerified) {
                     alert("This wallet address is already associated with a verified business.");
+                    nevigate('/')
                     setLoading(false); // Reset loading state
                     return; // Exit the function if the wallet address is already verified
                 } else {
                     alert("This wallet address is associated with a business but not verified. Please proceed to verification.");
                     setIsBusinessClaimed(true); // Set claim status to true to enable the next button
+                    setStep(4); // Redirect to step 4 for verification
                     setLoading(false); // Reset loading state
                     return; // Exit the function to allow verification
                 }
@@ -1065,6 +1584,7 @@ const handleClaimBusiness = async () => {
             if (onBusinessClaimed) {
                 onBusinessClaimed({ ...selectedBusiness, storeId: newStoreId });
             }
+            handleNext(); // Move to the next step after creating a new business
         } catch (error) {
             console.error("Error storing business data in Firestore:", error);
         } finally {
@@ -1072,3 +1592,111 @@ const handleClaimBusiness = async () => {
         }
     }
 };
+
+
+
+
+
+
+const handleWalletAddress = async () => {
+    try {
+        const addressDataCollection = collection(db, "stores");
+        const userDocRef = doc(addressDataCollection, storeId); // Use storeId to reference the same document
+        const docSnap = await getDoc(userDocRef); // Fetch the document
+
+        if (docSnap.exists()) {
+            const businessData = docSnap.data();
+            const existingWalletAddress = businessData.wallet_address;
+            const isVerified = businessData.isVerified; // Check the isVerified status
+
+            // Check if the current address matches the stored wallet_address
+            if (address && existingWalletAddress && address === existingWalletAddress) {
+                if (isVerified) {
+                    alert("Your Business & Wallet are already verified.");
+                    nevigate('/'); // Navigate to home page
+                } else {
+                    handleNext(); // Allow to proceed to step 4 for verification
+                }
+                return; // Exit the function after handling the case
+            }
+        }
+
+        // Proceed to store the wallet data if no match is found
+        await setDoc(userDocRef, {
+            wallet_chain: chain?.name || "Unknown", // Include wallet chain
+            wallet_address: address || "No address", // Include wallet address
+            onboardingStep: 2, // Update onboarding step
+        }, { merge: true }); // Merge to avoid overwriting existing data
+
+        handleNext(); // Move to the next step
+        console.log("Owner data saved successfully to Firestore with store ID:", storeId);
+    } catch (error) {
+        console.error("Error saving owner data to Firestore:", error);
+    }
+};
+
+
+
+const { address, isConnected } = useAccount();
+
+// When wallet is connected, set the address state
+useEffect(() => {
+    if (isConnected) {
+        setAddress(address); // Ensure address state is updated
+    }
+}, [isConnected, address]);
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Handle wallet data store
+// const handleWalletAddress = async () => {
+//     try {
+//         const addressDataCollection = collection(db, "stores");
+//         const q = query(addressDataCollection, where("wallet_address", "==", address)); // Query to find existing address
+//         const userDocRef = doc(addressDataCollection, storeId); // Reference to the document for this business
+//         const querySnapshot = await getDocs(q); // Execute the query
+//         const docSnap = await getDoc(userDocRef); // Fetch the document
+
+//         if (docSnap.exists()) {
+//             const businessData = docSnap.data();
+//             // const existingWalletAddress = businessData.wallet_address;
+//             const isVerified = businessData.isVerified; // Check the isVerified status
+
+//             // Check if the current address matches the stored wallet_address
+//             // if (address === existingWalletAddress) {
+//                 if (!querySnapshot.empty) {
+//                 if (isVerified) {
+//                     alert("Your Business & Wallet are already verified.");
+//                     nevigate('/'); // Navigate to home page
+//                 } else {
+//                     alert("Your wallet is associated with this business but not verified. Please proceed to verification.");
+//                     handleNext(); // Allow to proceed to step 4 for verification
+//                 }
+//                 return; // Exit the function after handling the case
+//             }
+//         }
+
+
+//         // If no matching document is found, proceed to store the wallet data
+//         await setDoc(userDocRef, {
+//             wallet_chain: chain?.name || "Unknown", // Include wallet chain
+//             wallet_address: address || "No address", // Include wallet address
+//             onboardingStep: 2, // Update onboarding step
+//         }, { merge: true }); // Merge to avoid overwriting existing data
+
+//         handleNext(); // Move to the next step
+//         console.log("Owner data saved successfully to Firestore with store ID:", storeId);
+//     } catch (error) {
+//         console.error("Error saving owner data to Firestore:", error);
+//     }
+// };

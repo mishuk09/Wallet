@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import underimg from './img/underimg.png';
+import verify from './img/verify.png';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount, useDisconnect } from 'wagmi';
 import { db } from "../Firebase/firebase";
@@ -8,6 +9,8 @@ import { collection, getDocs, query, where } from 'firebase/firestore';
 const Home = () => {
 
     const [businessData, setBusinessData] = useState(null); // State to store fetched business data
+    const [verificationMessageVisible, setVerificationMessageVisible] = useState(false)
+    const [isBusinessVerified, setIsBusinessVerified] = useState(false);
     const { address, isConnected } = useAccount();
     const { disconnect } = useDisconnect();
 
@@ -17,6 +20,8 @@ const Home = () => {
             await disconnect(); // Call the disconnect function
             console.log("Wallet disconnected");
             setBusinessData(null); // Reset business data
+            setVerificationMessageVisible(false);
+            setIsBusinessVerified(false)
         } catch (error) {
             console.error("Error disconnecting wallet:", error);
         }
@@ -36,8 +41,19 @@ const Home = () => {
                         ...doc.data()
                     }));
                     setBusinessData(businessInfo);
+
+                    // Set verification message visibility based on the verification status of the first business
+                    if (businessInfo[0].isVerified) {
+                        setVerificationMessageVisible(false); // Hide message if verified
+                        setIsBusinessVerified(true);
+                    } else {
+                        setVerificationMessageVisible(true); // Show message if not verified
+                        setIsBusinessVerified(false)
+                    }
                 } else {
                     console.log("No matching business found.");
+                    setVerificationMessageVisible(false); // Hide message if no business found
+                    setIsBusinessVerified(false)
                 }
             } catch (error) {
                 console.error("Error fetching business data:", error);
@@ -114,47 +130,73 @@ const Home = () => {
                     </div>
                 </div>
 
+                {/* Verification Message */}
+                {/* {verificationMessageVisible && (
+                    <p className='text-red-500 mt-4 font-semibold text-sm mb-4 px-4 text-center'>
+                        ⚠️ Your business has been added but not verified. Let's verify it!
+                    </p>
+                )} */}
 
+                {/* Verified Emoji */}
+                {/* {isBusinessVerified && (
+                    <p className='text-green-500 mt-4 font-semibold text-sm mb-4 px-4 text-center'>
+                        ✅ Your business is verified!
+                    </p>
+                )} */}
 
                 {/* Business Data Display */}
                 {
                     isConnected ? (
                         businessData && businessData.length > 0 ? (
                             <div className='mt-12 w-full'>
+                                <h1 className='text-xl flex items-center justify-center font-semibold text-gray-800 mb-4 text-center'>
+                                    <div>
+                                    Business Status
+                                    </div>
+                                    <div className='flex items-center justify-center ms-2'>
+                                        {isBusinessVerified && (
 
-                                <h1 className='text-xl font-semibold text-gray-800 mb-4 text-center'>
-                                    ✅  Your Business Verified
+                                            <img src={verify} className='w-5 h-5' alt="" srcset="" />
+                                        )}
+
+                                    </div>
                                 </h1>
                                 {
                                     businessData.map(business => (
-                                        <div key={business.id} className='   p-4 rounded-lg shadow-lg md-04'>
-                                            <p className='font-bold'>{business.name}    </p>
+                                        <div key={business.id} className='p-4 rounded-lg shadow-lg md-04'>
+                                            <p className='font-bold'>{business.name}</p>
                                             {
                                                 business.business && (
                                                     <>
                                                         <p>🏠 <span className='font-semibold'>Address : </span>{business.business.address}</p>
                                                         <p>📞 <span className='font-semibold'>Phone : </span>{business.business.phone}</p>
+                                                        {
+                                                            // Check if the business is not verified
+                                                            !business.isVerified && (
+                                                                <p className='text-red-500 text-sm mt-2'>
+                                                                    ⚠️ Your business has been added but not verified. Let's verify it!
+                                                                </p>
+                                                            )
+                                                        }
                                                     </>
                                                 )
                                             }
-
                                         </div>
                                     ))
                                 }
                             </div>
                         ) : (
-                            <div className='mt-14 text-center w-full    p-4 rounded-lg shadow-lg'>
+                            <div className='mt-14 text-center w-full p-4 rounded-lg shadow-lg'>
                                 <h2 className='text-xl font-semibold text-gray-800'>
-                                    ⚠️ Your Business not verified. Let's verify it!
+                                    ⚠️ Your Business not found. Let's Register!
                                 </h2>
-                                <p className='mt-2  text-gray-600'>
+                                <p className='mt-2 text-gray-600'>
                                     Please ensure your wallet address is linked to a verified business.
                                 </p>
-
                             </div>
                         )
                     ) : (
-                        <div className='mt-14 text-center w-full    p-4 rounded-lg shadow-lg md-04'>
+                        <div className='mt-14 text-center w-full p-4 rounded-lg shadow-lg md-04'>
                             <h2 className='text-xl font-semibold text-gray-800'>
                                 🔑 Please connect your wallet to access your business information.
                             </h2>
@@ -164,6 +206,7 @@ const Home = () => {
                         </div>
                     )
                 }
+
 
 
 
