@@ -130,19 +130,7 @@ const Home = () => {
                     </div>
                 </div>
 
-                {/* Verification Message */}
-                {/* {verificationMessageVisible && (
-                    <p className='text-red-500 mt-4 font-semibold text-sm mb-4 px-4 text-center'>
-                        ⚠️ Your business has been added but not verified. Let's verify it!
-                    </p>
-                )} */}
 
-                {/* Verified Emoji */}
-                {/* {isBusinessVerified && (
-                    <p className='text-green-500 mt-4 font-semibold text-sm mb-4 px-4 text-center'>
-                        ✅ Your business is verified!
-                    </p>
-                )} */}
 
                 {/* Business Data Display */}
                 {
@@ -151,13 +139,19 @@ const Home = () => {
                             <div className='mt-12 w-full'>
                                 <h1 className='text-xl flex items-center justify-center font-semibold text-gray-800 mb-4 text-center'>
                                     <div>
-                                    Business Status
+                                        Business Status
                                     </div>
                                     <div className='flex items-center justify-center ms-2'>
                                         {isBusinessVerified && (
 
                                             <img src={verify} className='w-5 h-5' alt="" srcset="" />
                                         )}
+
+                                        {
+                                            verificationMessageVisible && (
+                                                <p>🔓</p>
+                                            )
+                                        }
 
                                     </div>
                                 </h1>
