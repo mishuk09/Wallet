@@ -279,7 +279,7 @@ const Home = () => {
                                         }
                                     </div>
                                 ) : (
-                                    <div className='mt-14 text-center w-full p-4 rounded-lg shadow-lg'>
+                                    <div className='mt-14 text-center bg-white w-full p-4 rounded-lg shadow-lg'>
                                         <h2 className='text-xl font-semibold text-gray-800'>
                                             ⚠️ Your Business not found. Let's Register!
                                         </h2>
@@ -289,11 +289,11 @@ const Home = () => {
                                     </div>
                                 ))
                         ) : (
-                            <div className='mt-14 text-center w-full p-4 rounded-lg shadow-lg md-04'>
+                            <div className='mt-14 text-center bg-white w-full p-4 rounded-lg shadow-lg md-04'>
                                 <h2 className='text-xl font-semibold text-gray-800'>
                                     🔑 Please connect your wallet to access your business information.
                                 </h2>
-                                <p className='mt-2 text-gray-600'>
+                                <p className='mt-2 text-gray-600 '>
                                     Once connected, you will be able to see your verified business details.
                                 </p>
                             </div>
