@@ -135,7 +135,6 @@ const Home = () => {
     }, [isConnected]);
 
 
-    //handle map card details
 
     let clickTimeout = null;
 
@@ -154,6 +153,7 @@ const Home = () => {
 
 
 
+    
     return (
         <>
 
@@ -317,7 +317,7 @@ const Home = () => {
                             googleMapsApiKey="AIzaSyDOEDZEEqWAyWNyKpBNrhF9Cxti0AfRVDU"
                             libraries={["places"]}
                         >
-
+                           
 
                             <GoogleMap
                                 mapContainerStyle={mapContainerStyle}
@@ -334,7 +334,7 @@ const Home = () => {
                                 ))}
                             </GoogleMap>
 
-                            {/* Business map show  and make */}
+                           
                             {selectedBusiness && (
                                 <div className="overlay">
                                     <div className={`absolute duration-75 transition-all top-4 cursor-pointer left-4 bg-gray-50 text-start rounded-lg shadow-lg p-4 business-card ${selectedBusiness ? 'show' : ''}`}>
