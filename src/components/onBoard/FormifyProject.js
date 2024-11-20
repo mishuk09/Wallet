@@ -242,7 +242,7 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
                     if (onBusinessClaimed) {
                         onBusinessClaimed({ ...selectedBusiness, storeId: newStoreId });
                     }
-                    handleNext(); // Move to the next step after creating a new business
+                    // handleNext(); // Move to the next step after creating a new business
                     setLoading(false); // Reset loading state
                     return; // Exit the function
                 }
@@ -530,7 +530,7 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
                         <h2 className="  text-xl md:text-2xl font-semibold mb-4">Fill out the form if you are business owner and want to accept USDC in your business</h2>
                         <p className="text-gray-500 mb-2">👋 Let's start your dream journey</p>
 
-                        <form className="space-y-4 mb-6 mt-6" onSubmit={handleSubmitStep2}>
+                        <form className="space-y-4 2xl:w-[80%] mb-6 mt-6" onSubmit={handleSubmitStep2}>
                             <div className="flex w-full gap-4">
                                 <div className="w-full">
                                     <label className="block text-sm font-medium text-gray-700">First Name *</label>
@@ -538,7 +538,7 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
                                         name="firstName"
                                         type="text"
                                         placeholder="Enter name here"
-                                        className="mt-1 p-2 border text-sm border-gray-300 rounded w-full focus:ring-1 focus:ring-blue-600 focus:outline-none"
+                                        className="mt-1 p-2 2xl:p-4 border text-sm border-gray-300 rounded w-full focus:ring-1 focus:ring-blue-600 focus:outline-none"
                                         value={formData.firstName}
                                         onChange={handleInputChange}
                                         required
@@ -550,7 +550,7 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
                                         name="lastName"
                                         type="text"
                                         placeholder="Enter name here"
-                                        className="mt-1 p-2 border text-sm border-gray-300 rounded w-full focus:ring-1 focus:ring-blue-600 focus:outline-none"
+                                        className="mt-1 p-2 2xl:p-4 border text-sm border-gray-300 rounded w-full focus:ring-1 focus:ring-blue-600 focus:outline-none"
                                         value={formData.lastName}
                                         onChange={handleInputChange}
                                         required
@@ -563,7 +563,7 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
                                     name="email"
                                     type="email"
                                     placeholder="Work email"
-                                    className="mt-1 p-2 border text-sm border-gray-300 rounded w-full focus:ring-1 focus:ring-blue-600 focus:outline-none"
+                                    className="mt-1 p-2 2xl:p-4 border text-sm border-gray-300 rounded w-full focus:ring-1 focus:ring-blue-600 focus:outline-none"
                                     value={formData.email}
                                     onChange={handleInputChange}
                                     required
@@ -575,7 +575,7 @@ function FormifyProject({ walletAddress, onBusinessClaimed }) {
                                     name="phone"
                                     type="text"
                                     placeholder="Enter phone"
-                                    className="mt-1 p-2 border text-sm border-gray-300 rounded w-full focus:ring-1 focus:ring-blue-600 focus:outline-none"
+                                    className="mt-1 p-2 2xl:p-4 border text-sm border-gray-300 rounded w-full focus:ring-1 focus:ring-blue-600 focus:outline-none"
                                     value={formData.phone}
                                     onChange={handleInputChange}
                                     required
